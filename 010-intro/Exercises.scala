@@ -91,15 +91,15 @@ object Exercises extends App {
 
   // def curry[A,B,C] (f: (A,B)=>C) : A => (B => C) = ...
   //
-  // test if it type checks by currying power automatically:
+  // test if it type checks by currying isSorted automatically
 
-  // val power_curried: Double => Int => Double = ...
+  // def isSorted1[A]: Array[A] => ((A,A)=>Boolean) => Boolean = ...
 
   // Exercise 7
 
   // def uncurry[A,B,C] (f: A => B => C) : (A,B) => C =
 
-  // val power_uncurried: (Double,Int) => Double =
+  // def isSorted2[A] : (Array[A], (A,A) => Boolean) => Boolean = ...
 
   // Exercise 8
 
