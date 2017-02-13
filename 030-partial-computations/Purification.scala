@@ -13,7 +13,7 @@ def factorial (n :Int) :Int = {
 }
 
 // we extract the state we operate on: x, result and turn it into
-// parameters, which are additional to the one we already head
+// parameters, which are additional to the one we already had
 
 // the return type stays the same
 
