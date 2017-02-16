@@ -80,29 +80,46 @@ object Exercises extends App {
 
   // computes the total of expenses in cents
 
-  // def total (expenses: Array[Expense]) :Int = ...
+  def total (expenses: Array[Expense]) :Int = {
+    @annotation.tailrec
+    def sum(expenses: Array[Expense], acc: Int) : Int = 
+      if (expenses.isEmpty) acc
+      else sum(expenses.tail, acc+expenses.head.price)
+    sum(expenses, 0)
+  }
 
   val testcase1 = Array[Expense](
     new Expense("Coffee", 450),
     new Expense("Cake", 350) )
 
-  // assert (total (testcase1) == 800) // uncomment
+  assert (total (testcase1) == 800) // uncomment
 
   // Add one or two more tests
-  // ...
+  // assert (total (testcase1) == 100)
 
 
   // Exercise 5
 
-  // def isSorted[A] (as: Array[A], ordered: (A,A) =>  Boolean) :Boolean = ...
+  def isSorted[A] (as: Array[A], ordered: (A,A) =>  Boolean) :Boolean = {
+    @annotation.tailrec
+    def sort(as: Array[A], b: Boolean): Boolean =
+      if (as.length < 2) b
+      else sort (as.tail, b && ordered(as(0), as(1)))
+
+    sort(as, true)
+  }
+
+
+
 
   // some tests (uncomment)
 
-  // assert ( isSorted (Array(1,2,3,4,5,6), (a: Int, b: Int)=> a <= b))
-  // assert (!isSorted (Array(6,2,3,4,5,6), (a: Int, b: Int)=> a <= b))
+  assert ( isSorted (Array(1,2,3,4,5,6), (a: Int, b: Int)=> a <= b))
+  // assert ( isSorted (Array(6,2,3,4,5,6), (a: Int, b: Int)=> a <= b))
   // assert (!isSorted (Array(1,2,3,4,5,1), (a: Int, b: Int)=> a <= b))
 
   // add two tests with another type, for example an Array[String]
+  assert ( isSorted (Array("Foo", "Foo"), (a: String, b: String) => a <= b))
 
   // Exercise 6
 
