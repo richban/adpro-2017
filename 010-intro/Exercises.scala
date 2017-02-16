@@ -1,6 +1,6 @@
 // Advanced Programming, Exercises by A. Wąsowski, IT University of Copenhagen
 //
-// AUTHOR1:
+// AUTHOR1: Richard Banyi
 // AUTHOR2:
 //
 // Write ITU email addresses of both group members that contributed to
@@ -37,11 +37,28 @@ object Exercises extends App {
 
   // Exercise 3
 
-  // def fib (n: Int) : Int = ...
+  def fib (n: Int) : Int = {
+    @annotation.tailrec
+    def f(n: Int, p: Int, nn: Int): Int =
+      if (n <= 0) p
+      else f(n-1, nn, p+nn)
+    // f(n, 0, 1)
+
+    // Script from the web
+    // http://alvinalexander.com/scala/scala-recursion-examples-recursive-programming
+    @annotation.tailrec
+    def fibonacci(n: Int, p: Int = 0, nn: Int = 1): Int = n match {
+      case 0 => p
+      case 1 => nn
+      case _ => fibonacci(n-1, nn, p+nn)
+    }
+    fibonacci(n)
+  }
 
   // some tests (uncomment, add more):
 
-  // assert (fib (1) == 0)
+  assert (fib (1) == 1)
+  assert (fib (3) == 2)
   // ...
 
   // Exercise 4
