@@ -123,20 +123,22 @@ object Exercises extends App {
 
   // Exercise 6
 
-  // def curry[A,B,C] (f: (A,B)=>C) : A => (B => C) = ...
-  //
-  // test if it type checks by currying isSorted automatically
+  def curry[A,B,C] (f: (A,B)=>C) : A => (B => C) =
+    a => b => f(a, b)
 
-  // def isSorted1[A]: Array[A] => ((A,A)=>Boolean) => Boolean = ...
+  // test if it type checks by currying isSorted automatically
+  def isSorted1[A]: Array[A] => ((A,A)=>Boolean) => Boolean = (Array(1,2,3,4,5,6), (a: Int, b: Int)=> a <= b)
 
   // Exercise 7
 
-  // def uncurry[A,B,C] (f: A => B => C) : (A,B) => C =
+  def uncurry[A,B,C] (f: A => B => C) : (A,B) => C =
+    (a, b) => f(a)(b)
 
-  // def isSorted2[A] : (Array[A], (A,A) => Boolean) => Boolean = ...
+  def isSorted2[A] : (Array[A], (A,A) => Boolean) => Boolean = (Array(1,2,3,4,5,6), (a: Int, b: Int)=> a <= b)
 
   // Exercise 8
 
-  // def compose[A,B,C] (f: B => C, g: A => B) : A => C = ...
+  def compose[A,B,C] (f: B => C, g: A => B) : A => C =
+    a => f(g(a))
 
 }
