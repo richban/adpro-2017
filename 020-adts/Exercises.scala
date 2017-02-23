@@ -1,7 +1,7 @@
 // Advanced Programming 2017,
 // A. Wąsowski, IT University of Copenhagen
 //
-// AUTHOR1:
+// AUTHOR1: Richard Banyi
 // AUTHOR2:
 //
 // Write names and ITU email addresses of both group members that contributed to
@@ -47,7 +47,10 @@ object List {
 
   // Exercise 2
 
-  // def tail[A] (as: List[A]) :List[A] = ...
+  def tail[A] (as: List[A]) :List[A] = as match {
+    case Nil => sys.error("tail of empty list")
+    case Cons(_, t) => t
+  }
 
   // Exercise 3
 
