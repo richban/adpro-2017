@@ -103,13 +103,19 @@ object List {
 
   // Exercise 9
 
-  // def sum (as : List[Int]) : Int = ...
-  // def product (as :List[Int]) : Int = ...
-  // def length1 (as :List[Int]) : Int = ...
+  def sum (as : List[Int]) : Int =
+    foldLeft(as, 0)((x, y) => x + y)
+
+  def product (as :List[Int]) : Int =
+    foldLeft(as, 1)(_ * _)
+
+  def length1 (as :List[Int]) : Int =
+    foldLeft(as, 0)((acc, _) => acc + 1)
 
   // Exercise 10
 
-  // def reverse[A] (as :List[A]) :List[A] = ...
+  def reverse[A] (as :List[A]) :List[A] =
+    foldLeft(as, List[A]())((acc, h) => Cons(h, acc))
 
   // Exercise 11
 
