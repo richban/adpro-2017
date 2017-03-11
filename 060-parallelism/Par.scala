@@ -32,7 +32,7 @@ object Par {
 
   def lazyUnit[A] (a: =>A) : Par[A] = fork(unit(a))
 
-  // Exercise 1 (CB7.4) (8 minutes)
+  // Exercise 1 (CB7.4)
 
   // def asyncF[A,B] (f: A => B) : A => Par[B] =
 
@@ -56,7 +56,7 @@ object Par {
 
   // def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] = ...
 
-  // Exercise 4: implement map3 using map2 (5 minutes)
+  // Exercise 4: implement map3 using map2
 
   // def map3[A,B,C,D] (pa :Par[A], pb: Par[B], pc: Par[C]) (f: (A,B,C) => D) = ...
 
@@ -64,13 +64,13 @@ object Par {
 
   // def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean = p(e).get == p2(e).get
 
-  // Exercise 5 (CB7.11) (10 minutes)
+  // Exercise 5 (CB7.11)
 
   // def choiceN[A] (n: Par[Int]) (choices: List[Par[A]]) :Par[A] =
 
   // def choice[A] (cond: Par[Boolean]) (t: Par[A], f: Par[A]) : Par[A] =
 
-  // Exercise 6 (CB7.13) (10 minutes)
+  // Exercise 6 (CB7.13)
 
   // def chooser[A,B] (pa: Par[A]) (choices: A => Par[B]): Par[B] =
 
