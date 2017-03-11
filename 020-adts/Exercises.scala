@@ -47,26 +47,41 @@ object List {
 
   // Exercise 2
 
-  def tail[A] (as: List[A]) :List[A] = as match {
+  def tail[A] (as: List[A]): List[A] = as match {
     case Nil => sys.error("tail of empty list")
     case Cons(_, t) => t
   }
 
   // Exercise 3
 
-  // def setHead[A] (as: List[A], newHead: A) : List[A] = ...
+  def setHead[A] (as: List[A], newHead: A) : List[A] = as match {
+    case Nil => Cons(newHead, Nil)
+    case Cons(_, t) => Cons(newHead, t)
+  }
 
   // Exercise 4
 
-  // def drop[A] (l: List[A], n: Int) : List[A] = ...
+  def drop[A] (l: List[A], n: Int) : List[A] =
+    if (n <= 0) l
+    else l match {
+      case Nil => Nil
+      case Cons(_, t) => drop(t, n-1)
+    }
 
   // Exercise 5
+  // still unclear
 
-  // def dropWhile[A](l: List[A], f: A => Boolean): List[A] = ...
-
+  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
+    case Cons(h, t) if f(h) => dropWhile(t, f)
+    case _ => l
+  }
   // Exercise 6
 
-  // def init[A](l: List[A]): List[A] = ...
+  def init[A](l: List[A]): List[A] = l match {
+    case Nil => sys.error("empty list")
+    case Cons(_, Nil) => Nil
+    case Cons(h, t) => Cons(h, init(t))
+  }
 
   // Exercise 7
 
