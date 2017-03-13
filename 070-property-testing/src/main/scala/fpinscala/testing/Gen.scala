@@ -191,7 +191,7 @@ import Prop._
 
 case class Prop (run :(TestCases,RNG) => Result) {
 
-  // (Exercise 8)
+  // (Exercise 7)
 
   // def && (that :Prop) :Prop = Prop { ... }
 
