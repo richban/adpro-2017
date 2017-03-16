@@ -58,7 +58,7 @@ object Par {
 
   // Exercise 4: implement map3 using map2
 
-  // def map3[A,B,C,D] (pa :Par[A], pb: Par[B], pc: Par[C]) (f: (A,B,C) => D) = ...
+  // def map3[A,B,C,D] (pa :Par[A], pb: Par[B], pc: Par[C]) (f: (A,B,C) => D) :Par[D]  = ...
 
   // shown in the book
 
