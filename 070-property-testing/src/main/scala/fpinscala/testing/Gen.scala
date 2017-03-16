@@ -138,20 +138,7 @@ object Gen {
 
   // (Exercise 3 is found in the Gen class above)
 
-  // Exercise 7 (Ex. 8.8 in Chiusano and Bjarnasson)
-  //
-  // Hint: Recall that we already have a generator of random double numbers
-  // from range (0;1); See Exercise 3. First translate weights to
-  // probabilities. Then use our generator of doubles to simulate an unfair
-  // coin with flatMap.
-
-  // def weighted[A](g1: (Gen[A],Double), g2: (Gen[A],Double)): Gen[A] = ...
-  //
-  // Nice test idea for the above: create 1.0:2.0 boolean generator, translate
-  // to stream, and try longer and longer prefixes to see if the law of big
-  // numbers works
-  //
-  // (Exercise 8 is found below in class Prop)
+  // (Exercise 7 is found below in class Prop)
 
 }
 
