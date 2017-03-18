@@ -63,9 +63,6 @@ case class Gen[A] (sample :State[RNG,A]) {
 
 
   // Exercise 4 (Ex. 8.6 [Chiusano, Bjarnasson 2015])
-  //
-  // So this is a solution that is ignoring the nice API that we developed.
-  // It builds the result from ground up.
 
   // def flatMap[B] (f: A => Gen[B]) :Gen[B] = ...
 
