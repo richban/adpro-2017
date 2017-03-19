@@ -130,7 +130,8 @@ object List {
     case Cons(h,t) => Cons(h, append(t, a2))
   }
 
-  // def concat[A] (as: List[List[A]]) :List[A] = ..
+  def concat[A] (as: List[List[A]]) :List[A] =
+    foldRight(as, Nil:List[A])(append)
 
   // Exercise 13
 
