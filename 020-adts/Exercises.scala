@@ -140,7 +140,11 @@ object List {
 
   // Exercise 14
 
-  // def flatMap[A,B](as: List[A])(f: A => List[B]) : List[B] = ...
+  def map[A,B] (as: List[A]) (f: A => B): List[B] =
+    foldRight(as, Nil:List[B])((h, t) => Cons(f(h), t))
+
+  def flatMap[A,B](as: List[A])(f: A => List[B]) : List[B] =
+    concat(map(as)(f))
 
   // Exercise 15
 
