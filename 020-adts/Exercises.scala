@@ -133,9 +133,10 @@ object List {
   def concat[A] (as: List[List[A]]) :List[A] =
     foldRight(as, Nil:List[A])(append)
 
-  // Exercise 13
+  //Exercise 13
 
-  // def filter[A] (as: List[A]) (f: A => Boolean) : List[A] = ...
+  def filter[A] (as: List[A]) (f: A => Boolean) : List[A] =
+    foldRight(as, Nil:List[A])((h, t) => if (f(h)) Cons(h, t) else t)
 
   // Exercise 14
 
