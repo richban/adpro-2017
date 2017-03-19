@@ -148,15 +148,24 @@ object List {
 
   // Exercise 15
 
-  // def filter1[A] (l: List[A]) (p: A => Boolean) :List[A] = ...
+  def filter1[A] (l: List[A]) (p: A => Boolean) :List[A] =
+    flatMap(l)(a => if (p(a)) List(a) else Nil)
 
   // Exercise 16
 
-  // def add (l: List[Int]) (r: List[Int]): List[Int] = ...
+  def add (l: List[Int]) (r: List[Int]): List[Int] = (l, r) match {
+    case (Nil, _) => Nil
+    case (_, Nil) => Nil
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(h1+h2, add(t1)(t2))
+  }
 
   // Exercise 17
 
-  // def zipWith[A,B,C] (f : (A,B)=>C) (l: List[A], r: List[B]) : List[C] = ...
+  def zipWith[A,B,C] (f : (A,B)=>C) (l: List[A], r: List[B]) : List[C] = (l, r) match {
+    case (Nil, _) => Nil
+    case (_, Nil) => Nil
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))
+  }
 
   // Exercise 18
 
