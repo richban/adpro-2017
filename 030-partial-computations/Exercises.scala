@@ -39,10 +39,11 @@
  * reimplement them in the subclass, if classes not traits are used.  This is
  * not a problem if I mix in a trait construction time. */
 
-trait OrderedPoint extends ... {
-
-  override def compare (that :java.awt.Point) :Int =  ...
-
+trait OrderedPoint extends Ordered[java.awt.Point] {
+  this: java.awt.Point =>
+  override def compare (that :java.awt.Point) :Int =
+    if (this.x == that.x) (this.y - that.y)
+    else (this.x - that.x)
 }
 
 // Chapter 3
@@ -55,11 +56,17 @@ object Tree {
 
   // Exercise 2 (3.25)
 
-  // def size[A] (t :Tree[A]) :Int = ...
+  def size[A] (t :Tree[A]) :Int = t match {
+    case Leaf(v) => 1
+    case Branch(l, r) => (size(l) + size(r) + 1)
+  }
 
   // Exercise 3 (3.26)
 
-  // def maximum (t: Tree[Int]) :Int = ...
+  def maximum (t: Tree[Int]) :Int = t match {
+    case Leaf(v) => v
+    case Branch(l, r) => maximum(l) max maximum(r)
+  }
 
   // Exercise 4 (3.28)
 
