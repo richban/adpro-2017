@@ -70,15 +70,26 @@ object Tree {
 
   // Exercise 4 (3.28)
 
-  // def map[A,B] (t: Tree[A]) (f: A => B) : Tree[B] = ...
+  def map[A,B] (t: Tree[A]) (f: A => B) : Tree[B] = t match {
+    case Leaf(v) => Leaf(f(v))
+    case Branch(l, r) => Branch(map(l)(f), map(r)(f))
+  }
 
   // Exercise 5 (3.29)
 
-  // def fold[A,B] (t: Tree[A]) (f: (B,B) => B) (g: A => B) :B = ...
+  def fold[A,B] (t: Tree[A]) (f: (B,B) => B) (g: A => B) :B = t match {
+    case Leaf(v) => g(v)
+    case Branch(l, r) => f(fold(l)(f)(g), fold(r)(f)(g))
+  }
 
-  // def size1[A] ...
-  // def maximum1 ...
-  // def map1[A,B] ...
+  def size1[A](t: Tree[A]) : Int =
+    fold[A, Int](t) (_ + _ + 1) (a => 1)
+
+  def maximum1(t: Tree[Int]) : Int =
+    fold[Int, Int](t) (_ max _) (v => v)
+
+  def map1[A,B](t: Tree[A])(f: A => B) : Tree[B] =
+    fold[A, Tree[B]](t) (Branch(_,_)) (a => Leaf(f(a)))
 
 }
 
