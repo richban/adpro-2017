@@ -86,7 +86,7 @@ object Tree {
     fold[A, Int](t) (_ + _ + 1) (a => 1)
 
   def maximum1(t: Tree[Int]) : Int =
-    fold[Int, Int](t) (_ max _) (v => v)
+    fold[Int, Int](t) (_ max _) ((v) => v)
 
   def map1[A,B](t: Tree[A])(f: A => B) : Tree[B] =
     fold[A, Tree[B]](t) (Branch(_,_)) (a => Leaf(f(a)))
@@ -97,20 +97,35 @@ sealed trait Option[+A] {
 
   // Exercise 6 (4.1)
 
-  // def map[B] (f: A=>B) : Option[B] = ...
+  def map[B] (f: A=>B) : Option[B] = this match {
+    case Some(a) => Some(f(a))
+    case _ => None
+  }
 
   // Ignore the arrow in default's type below for the time being.
   // (it should work (almost) as if it was not there)
 
-  // def getOrElse[B >: A] (default: => B) :B = ...
+  def getOrElse[B >: A] (default: => B) :B = this match {
+    case Some(x) => x
+    case _ => default
+  }
 
-  // def flatMap[B] (f: A=>Option[B]) : Option[B] = ...
+  def flatMap[B] (f: A=>Option[B]) : Option[B] = this match {
+    case Some(x) => f(x)
+    case _ => None
+  }
 
   // Ignore the arrow in ob's type this week
 
-  // def orElse[B >: A] (ob : => Option[B]) : Option[B] = ...
+  def orElse[B >: A] (ob : => Option[B]) : Option[B] = this match {
+    case Some(x) => this
+    case _ => ob
+  }
 
-  // def filter (f: A => Boolean) : Option[A] = ...
+  def filter (f: A => Boolean) : Option[A] = this match {
+    case Some(x) if f(x) => this
+    case _ => None
+  }
 
 }
 
@@ -127,7 +142,20 @@ object ExercisesOption {
 
   // Exercise 7 (4.2)
 
-  // def variance (xs: Seq[Double]) : Option[Double] = ..
+
+  def variance (xs: Seq[Double]) : Option[Double] =
+    if (xs.isEmpty) None
+    else for{
+      m <- mean(xs)
+      v <- mean(xs.map(x => math.pow(x - m, 2)))
+    }
+    yield {
+      v
+    }
+
+
+  def variance2 (xs: Seq[Double]) : Option[Double] =
+    mean(xs).flatMap(m => mean(xs.map(x => math.pow(x - m, 2))))
 
   // Exercise 8 (4.3)
 
@@ -150,9 +178,9 @@ object ExercisesOption {
 object Tests extends App {
 
   // Exercise 1
-  // val p = new java.awt.Point(0,1) with OrderedPoint
-  // val q = new java.awt.Point(0,2) with OrderedPoint
-  // assert(p < q)
+  val p = new java.awt.Point(0,1) with OrderedPoint
+  val q = new java.awt.Point(0,2) with OrderedPoint
+  assert(p < q)
 
   // Notice how we are using nice infix comparison on java.awt
   // objects that were implemented way before Scala existed :) (And without the
@@ -161,33 +189,34 @@ object Tests extends App {
 
 
   // Exercise 2
-  // assert (Tree.size (Branch(Leaf(1), Leaf(2))) == 3)
+  assert (Tree.size (Branch(Leaf(1), Leaf(2))) == 3)
   // Exercise 3
-  // assert (Tree.maximum (Branch(Leaf(1), Leaf(2))) == 2)
+  assert (Tree.maximum (Branch(Leaf(1), Leaf(2))) == 2)
   // Exercise 4
-  // val t5 = Branch(Leaf("1"), Branch(Branch(Leaf("2"),Leaf("3")),Leaf("4")))
-  // assert (Tree.map (t4) (_.toString) == t5)
+  val t4 = Branch(Leaf(1), Branch(Branch(Leaf(2),Leaf(3)),Leaf(4)))
+  val t5 = Branch(Leaf("1"), Branch(Branch(Leaf("2"),Leaf("3")),Leaf("4")))
+  assert (Tree.map (t4) (_.toString) == t5)
 
   // Exercise 5
-  // assert (Tree.size1 (Branch(Leaf(1), Leaf(2))) == 3)
-  // assert (Tree.maximum1 (Branch(Leaf(1), Leaf(2))) == 2)
-  // assert (Tree.map1 (t4) (_.toString) == t5)
+  assert (Tree.size1 (Branch(Leaf(1), Leaf(2))) == 3)
+  assert (Tree.maximum1 (Branch(Leaf(1), Leaf(2))) == 2)
+  assert (Tree.map1 (t4) (_.toString) == t5)
 
   // Exercise 6
-  // assert (Some(1).map (x => x +1) == Some(2))
-  // assert (Some(41).getOrElse(42) == 41)
-  // assert (None.getOrElse(42) == 42)
-  // assert (Some(1).flatMap (x => Some(x+1)) == Some(2))
-  // assert ((None: Option[Int]).flatMap[Int] (x => Some(x+1)) == None)
-  // assert (Some(41).orElse (Some(42)) == Some(41))
-  // assert (None.orElse (Some(42)) == Some(42))
-  // assert (Some(42).filter(_ == 42) == Some(42))
-  // assert (Some(41).filter(_ == 42) == None)
-  // assert ((None: Option[Int]).filter(_ == 42) == None)
+  assert (Some(1).map (x => x +1) == Some(2))
+  assert (Some(41).getOrElse(42) == 41)
+  assert (None.getOrElse(42) == 42)
+  assert (Some(1).flatMap (x => Some(x+1)) == Some(2))
+  assert ((None: Option[Int]).flatMap[Int] (x => Some(x+1)) == None)
+  assert (Some(41).orElse (Some(42)) == Some(41))
+  assert (None.orElse (Some(42)) == Some(42))
+  assert (Some(42).filter(_ == 42) == Some(42))
+  assert (Some(41).filter(_ == 42) == None)
+  assert ((None: Option[Int]).filter(_ == 42) == None)
 
   // Exercise 7
-  // assert (ExercisesOption.variance (List(42,42,42)) == Some(0.0))
-  // assert (ExercisesOption.variance (List()) == None)
+  assert (ExercisesOption.variance (List(42,42,42)) == Some(0.0))
+  assert (ExercisesOption.variance (List()) == None)
 
 
   // Exercise 8
