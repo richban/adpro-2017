@@ -63,9 +63,6 @@ case class Gen[A] (sample :State[RNG,A]) {
 
 
   // Exercise 4 (Ex. 8.6 [Chiusano, Bjarnasson 2015])
-  //
-  // So this is a solution that is ignoring the nice API that we developed.
-  // It builds the result from ground up.
 
   // def flatMap[B] (f: A => Gen[B]) :Gen[B] = ...
 
@@ -138,20 +135,7 @@ object Gen {
 
   // (Exercise 3 is found in the Gen class above)
 
-  // Exercise 7 (Ex. 8.8 in Chiusano and Bjarnasson)
-  //
-  // Hint: Recall that we already have a generator of random double numbers
-  // from range (0;1); See Exercise 3. First translate weights to
-  // probabilities. Then use our generator of doubles to simulate an unfair
-  // coin with flatMap.
-
-  // def weighted[A](g1: (Gen[A],Double), g2: (Gen[A],Double)): Gen[A] = ...
-  //
-  // Nice test idea for the above: create 1.0:2.0 boolean generator, translate
-  // to stream, and try longer and longer prefixes to see if the law of big
-  // numbers works
-  //
-  // (Exercise 8 is found below in class Prop)
+  // (Exercise 7 is found below in class Prop)
 
 }
 
@@ -191,7 +175,7 @@ import Prop._
 
 case class Prop (run :(TestCases,RNG) => Result) {
 
-  // (Exercise 8)
+  // (Exercise 7)
 
   // def && (that :Prop) :Prop = Prop { ... }
 

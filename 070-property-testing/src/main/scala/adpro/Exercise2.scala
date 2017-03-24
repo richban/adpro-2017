@@ -1,5 +1,10 @@
-// Advanced Programming 2015
+// Advanced Programming
 // Andrzej Wasowski, IT Univesity of Copenhagen
+//
+// I build these files using sbt (see the toplevel README file for this week).
+// If you want to build them directly, you will need to put all the files in the
+// same directory or otherwise figure out the right compiler options.
+
 
 package adpro
 

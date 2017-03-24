@@ -1,4 +1,4 @@
-// Advanced Programming 2015
+// Advanced Programming
 // Andrzej Wasowski, IT Univesity of Copenhagen
 //
 // 1. Introduction
@@ -16,8 +16,13 @@
 // the State.scala file whenever you do not understand.
 
 // 2. Build
+//
+// I build these files using sbt (see the toplevel README file for this week). If
+// you want to build them directly, the instructions are below, but you will
+// need to put all the files in the same directory to use the compiler directly
+// (or otherwise figure out the right options).
 
-// First compile State.scala// Advanced Programming 2015
+// First compile State.scala
 // $ fsc State.scala
 //
 // This file is designed so that you can compile it as a regular scala module
