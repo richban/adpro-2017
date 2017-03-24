@@ -1,6 +1,6 @@
 // Advanced Programming, Exercises by A. Wąsowski, IT University of Copenhagen
 //
-// AUTHOR1:
+// AUTHOR1: Richard Banyi
 // AUTHOR2:
 // Group number:
 //
@@ -159,11 +159,18 @@ object ExercisesOption {
 
   // Exercise 8 (4.3)
 
-  // def map2[A,B,C] (ao: Option[A], bo: Option[B]) (f: (A,B) => C) :Option[C] =
+  def map2[A,B,C] (ao: Option[A], bo: Option[B]) (f: (A,B) => C) :Option[C] =
+    for {
+      a <- ao
+      b <- bo
+    } yield f (a, b)
+
+    // ao.flatMap(a => bo.map(b => f(a, b)))
 
   // Exercise 9 (4.4)
 
-  // def sequence[A] (aos: List[Option[A]]) : Option[List[A]] = ...
+  def sequence[A] (aos: List[Option[A]]) : Option[List[A]] = 
+    aos.foldRight[Option[List[A]]] ( Some(Nil) ) ( (a, b) => map2(a, b) (_ :: _) )
 
   // Exercise 10 (4.5)
 
@@ -220,10 +227,10 @@ object Tests extends App {
 
 
   // Exercise 8
-  // assert (ExercisesOption.map2 (Some(42),Some(7)) (_ + _) == Some(49))
-  // assert (ExercisesOption.map2 (Some(42),None) (_ + _) == None)
-  // assert (ExercisesOption.map2 (None: Option[Int],Some(7)) (_ + _) == None)
-  // assert (ExercisesOption.map2 (None: Option[Int],None) (_ + _) == None)
+  assert (ExercisesOption.map2 (Some(42),Some(7)) (_ + _) == Some(49))
+  assert (ExercisesOption.map2 (Some(42),None) (_ + _) == None)
+  assert (ExercisesOption.map2 (None: Option[Int],Some(7)) (_ + _) == None)
+  assert (ExercisesOption.map2 (None: Option[Int],None) (_ + _) == None)
 
   // Exercise 9
   // assert (ExercisesOption.sequence (List(Some(1), Some(2), Some(42))) == Some(List(1,2,42)))
