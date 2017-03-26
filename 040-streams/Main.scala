@@ -17,4 +17,6 @@ println (l1.headOption)
 println (l2.headOption)
 println (l3.headOption)
 
-
+println (Stream.to(3).toList)
+assert(Stream.to(3).toList == List(1, 2, 3))
+assert(Stream(1, 2, 3).toList == List(1, 2, 3))
