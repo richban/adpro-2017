@@ -15,6 +15,8 @@ import Monad._
 
 object  MonadSpec extends Properties("Monad[F[_]] laws..") {
 
+  // Exercise 15
+
   // Note: The law is fine, but remember that scalacheck has presently a very
   // weak function generator (only generates constant functions)
   def associative[A,F[_]] (m: Monad[F]) (implicit a: Arbitrary[F[A]]): Prop =
@@ -37,7 +39,7 @@ object  MonadSpec extends Properties("Monad[F[_]] laws..") {
   // uncomment when you have optionMonad
   // property ("of optionMonad") = monad[Int,Option] (optionMonad)
 
-  // Exercise 15
+  // Now test more monads:
 
   // property ...
 
