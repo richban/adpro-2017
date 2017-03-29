@@ -52,6 +52,22 @@ sealed trait Stream[+A] {
     case Empty => Nil
   }
 
+  // Exercise 4.3
+  def take(n: Int) :Stream[A] = this match {
+    case Cons(h, t) if (n > 0) => cons(h(), t().take(n-1))
+    case _ => empty
+  }
+
+  def drop(n: Int) :Stream[A] = this match {
+    case Cons(_, t) if (n > 0) => t().drop(n-1)
+    case _ => this
+  }
+
+  // Exercise 4.4
+  def takeWhile(p: A => Boolean): Stream[A] = this match {
+    case Cons(h, t) if (p(h())) => cons(h(), t().takeWhile(p)) 
+    case _ => empty
+  }
   //def find (p :A => Boolean) :Option[A] = this.filter (p).headOption
 }
 
@@ -82,7 +98,7 @@ object Stream {
   // Exercise 4.1
   def to (n: Int) :Stream[Int] = {
     def reverse(acc: Int): Stream[Int] = {
-      if (acc < n)
+      if (acc <= n)
         cons(acc, reverse(acc + 1))
       else
         empty
@@ -94,7 +110,6 @@ object Stream {
   def from(n: Int) :Stream[Int] = {
     cons(n, from(n+1))
   }
-
 
 }
 // vim:tw=0:cc=80:nowrap

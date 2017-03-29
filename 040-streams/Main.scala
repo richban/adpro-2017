@@ -1,4 +1,5 @@
 // Advanced Programming 2015
+//
 // Andrzej Wąsowski, IT University of Copenhagen
 //
 // A script meant to be loaded into REPL (scala -i Main.scala)
@@ -19,4 +20,9 @@ println (l3.headOption)
 
 println (Stream.to(3).toList)
 assert(Stream.to(3).toList == List(1, 2, 3))
-assert(Stream(1, 2, 3).toList == List(1, 2, 3))
+println (Stream.to(3).take(2).toList)
+assert(Stream.to(3).take(2).toList == List(1, 2))
+println (Stream.to(3).drop(1).toList)
+assert(Stream.to(4).drop(2).toList == List(3, 4))
+println(Stream.to(10).takeWhile(_ < 4 ).toList)
+assert(Stream.to(10).takeWhile( _ < 4).toList == List(1, 2, 3))
