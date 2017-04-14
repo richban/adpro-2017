@@ -104,11 +104,17 @@ sealed trait Stream[+A] {
   //def find(p: A => Boolean): Option[A] =
   //  this.filter(p).headOption
 
-  // Exercise 4.11
-
-  // Exercise 4.12
-
   // Exercise 4.13
+  def map2[B](f: A => B): Stream[B] = unfold(this) {
+    case Cons(h, t) => Some(f(h()), t())
+    case _ => None
+  }
+
+  def takeWhile3(f: A => Boolean): Stream[A] = unfold(this) {
+    case Cons(h, t) if (f(h)) => Some(f(h()), t())
+    case _ => None
+  }
+
 }
 
 
@@ -134,6 +140,13 @@ object Stream {
     // Note 1: ":_*" tells Scala to treat a list as multiple params
     // Note 2: pattern matching with :: does not seem to work with Seq, so we
     //         use a generic function API of Seq
+    //
+
+  // Exercise 4.11
+  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = f(z) match {
+    case None => empty
+    case Some((a, s)) => cons(a, unfold(s)(f))
+  }
 
   // Exercise 4.1
   def to (n: Int) :Stream[Int] = {
@@ -150,6 +163,11 @@ object Stream {
   def from(n: Int) :Stream[Int] = {
     cons(n, from(n+1))
   }
+  // Exercise 4.12
+  def from1(n: Int) :Stream[Int] =
+    unfold(n)(n => Some(n, n+1))
+
+  // def fib1
 
   // Exercise 4.10
   val fibs = {

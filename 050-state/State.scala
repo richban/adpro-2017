@@ -16,26 +16,49 @@ object RNG {
 
   // Exercise 1 (CB 6.1)
 
-  // def nonNegativeInt(rng: RNG): (Int, RNG) = { ...
+  def nonNegativeInt(rng: RNG): (Int, RNG) = rng.nextInt match {
+    case (Int.MinValue, g) => (Int.MaxValue, g)
+    case (x, g) => (Math.abs(x), g)
+  }
 
   // Exercise 2 (CB 6.2)
-
-  // def double(rng: RNG): (Double, RNG) = { ...
-
+  def double(rng: RNG): (Double, RNG) = nonNegativeInt(rng) match {
+    case (x, g) => (((x-1).toDouble) / Int.MaxValue, g)
+  }
   // Exercise 3 (CB 6.3)
 
-  // def intDouble(rng: RNG): ((Int, Double), RNG) = { ...
+  def intDouble(rng: RNG): ((Int, Double), RNG) = {
+    val rng1 = nonNegativeInt(rng)
+    val rng2 = double(rng1._2)
+    ((rng1._1, rng2._1), rng2._2)
+  }
 
-  // def doubleInt(rng: RNG): ((Double, Int), RNG) = { ...
+  def doubleInt(rng: RNG): ((Double, Int), RNG) = {
+    val rng1 = double(rng)
+    val rng2 = nonNegativeInt(rng1._2)
+    ((rng1._1, rng2._1), rng2._2)
+  }
 
-  // def double3(rng: RNG): ((Double, Double, Double), RNG) = { ...
+  def double3(rng: RNG): ((Double, Double, Double), RNG) = {
+    val rng1 = double(rng)
+    val rng2 = double(rng1._2)
+    val rng3 = double(rng2._2)
+    ((rng1._1, rng2._1, rng3._1), rng3._2)
+  }
 
   // def boolean(rng: RNG): (Boolean, RNG) =
   //  rng.nextInt match { case (i,rng2) => (i%2==0,rng2) }
 
   // Exercise 4 (CB 6.4)
 
-  // def ints(count: Int)(rng: RNG): (List[Int], RNG) =
+  def ints(count: Int)(rng: RNG): (List[Int], RNG) = 
+    nonNegativeInt(rng) match {
+      case (x, g) if count > 1 => {
+        val rng1 = ints(count-1)(g)
+        (x::rng1._1, rng1._2)
+      }
+      case (x, g) => (x :: Nil, g)
+  }
 
   // There is something terribly repetitive about passing the RNG along
   // every time. What could we do to eliminate some of this duplication
@@ -58,11 +81,16 @@ object RNG {
 
   // Exercise 5 (CB 6.5)
 
-  // val _double: Rand[Double] =
+  val _double: Rand[Double] = map(nonNegativeInt)(i => ((i-1).toDouble) / Int.MaxValue)
 
   // Exercise 6 (CB 6.6)
 
-  // def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
+  def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
+    rng => {
+      val (a, rng1) = ra(rng)
+      val (b, rng2) = rb(rng1)
+      (f(a, b), rng2)
+    }
 
   // this is given in the book
 
@@ -75,15 +103,39 @@ object RNG {
 
   // Exercise 7 (6.7)
 
-  // def sequence[A](fs: List[Rand[A]]): Rand[List[A]] =
+  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] =
+    rng => {
+      def loop(rs: List[Rand[A]], acc: List[A], g: RNG): (List[A], RNG) = rs match {
+        case Nil => (acc.reverse, g)
+        case x :: xs =>
+          val (a, rng2) = x(rng)
+          loop(xs, a :: acc, rng2)
+      }
+    loop(fs, List.empty, rng)
+  }
 
   // def _ints(count: Int): Rand[List[Int]] = ...
 
   // Exercise 8 (6.8)
 
-  // def flatMap[A,B](f: Rand[A])(g: A => Rand[B]): Rand[B] = ...
+  def flatMap[A,B](f: Rand[A])(g: A => Rand[B]): Rand[B] =
+    rng => {
+      val (a, rng1) = f(rng)
+      g(a)(rng1)
+    }
 
-  // def nonNegativeLessThan(n: Int): Rand[Int] = { ...
+  def nonNegativeLessThan(n: Int): Rand[Int] = {
+    flatMap(nonNegativeInt){
+      i =>
+        val mod = i % n
+        if (i + (n-1) - mod >= 0){
+          rng => (mod, rng)
+        }
+        else {
+          rng => nonNegativeLessThan(n)(rng)
+        }
+    }
+  }
 
 }
 
@@ -98,6 +150,7 @@ case class State[S, +A](run: S => (A, S)) {
   // def map2[B,C](sb: State[S, B])(f: (A, B) => C): State[S, C] = ...
 
   // def flatMap[B](f: A => State[S, B]): State[S, B] = State(s => { ...
+  // 
 
 }
 
@@ -132,8 +185,32 @@ object State {
   // Exercise 11
 
   // val random_integers = ...
+  //
 
 }
 
+object Tests extends App {
 
-// vim:cc=80:foldmethod=indent:foldenable
+  println("EXERCISE 1")
+  println(RNG.nonNegativeInt(RNG.Simple(4200))._1);
+  println("----------")
+
+  println("EXERCISE 2")
+  println(RNG.double(RNG.Simple(4200))._1)
+  println("----------")
+
+  println("EXERCISE 3")
+  println(RNG.intDouble(RNG.Simple(4200))._1)
+  println(RNG.doubleInt(RNG.Simple(4200))._1)
+  println(RNG.double3(RNG.Simple(4200))._1)
+  println("----------")
+
+  println("EXERCISE 4")
+  println(RNG.ints(5)(RNG.Simple(4200))._1)
+  println("----------")
+
+  println("EXERCISE 5")
+  println(RNG._double(RNG.Simple(4200))._1)
+  println("----------")
+
+}
