@@ -34,7 +34,8 @@ object Par {
 
   // Exercise 1 (CB7.4)
 
-  // def asyncF[A,B] (f: A => B) : A => Par[B] =
+  def asyncF[A,B] (f: A => B) : A => Par[B] =
+    a => lazyUnit(f(a))
 
   // map is shown in the book
 
@@ -43,16 +44,18 @@ object Par {
 
   // Exercise 2 (CB7.5)
 
-  // def sequence[A] (ps: List[Par[A]]): Par[List[A]] = ...
+  def sequence[A] (ps: List[Par[A]]): Par[List[A]] =
+    ps.foldRight[Par[List[A]]](unit(List()))((h,t) => map2(h,t)(_ :: _))
+
 
   // Exercise 3 (CB7.6)
 
-  // this is shown in the book:
+  //this is shown in the book:
 
-  // def parMap[A,B](ps: List[A])(f: A => B): Par[List[B]] = fork {
-  //   val fbs: List[Par[B]] = ps.map(asyncF(f))
-  //   sequence(fbs)
-  // }
+  def parMap[A,B](ps: List[A])(f: A => B): Par[List[B]] = fork {
+     val fbs: List[Par[B]] = ps.map(asyncF(f))
+     sequence(fbs)
+  }
 
   // def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] = ...
 
