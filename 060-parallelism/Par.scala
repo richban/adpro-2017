@@ -80,7 +80,8 @@ object Par {
   def choiceN[A] (n: Par[Int]) (choices: List[Par[A]]) :Par[A] =
     es => choices(n(es).get)(es)
 
-  // def choice[A] (cond: Par[Boolean]) (t: Par[A], f: Par[A]) : Par[A] =
+  def choice[A] (cond: Par[Boolean]) (t: Par[A], f: Par[A]) : Par[A] =
+    choiceN(map(cond)(b => if(b) 0 else 1))(List(t, f))
 
   // Exercise 6 (CB7.13)
 
@@ -137,12 +138,10 @@ object Main {
         assert (Par.equal (pool) (Par.choiceN (
                 Par.unit (index)) (list), list (index)))
 
-        //val parTrue = Par.unit (true)
-        //val parFalse = Par.unit (false)
-        //assert (Par.equal (pool) (Par.choice (parTrue) (parTrue,
-        //        parFalse), parTrue))
-        //assert (Par.equal (pool) (Par.choice (parFalse) (parTrue,
-        //        parFalse), parFalse))
+        val parTrue = Par.unit (true)
+        val parFalse = Par.unit (false)
+        assert (Par.equal (pool) (Par.choice (parTrue) (parTrue, parFalse), parTrue))
+        assert (Par.equal (pool) (Par.choice (parFalse) (parTrue, parFalse), parFalse))
 
         //// Exercise 6 tests
 
