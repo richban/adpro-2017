@@ -43,9 +43,12 @@ object Par {
     map2 (pa,unit (())) ((a,_) => f(a))
 
   // Exercise 2 (CB7.5)
+  //
+  def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean =
+   p(e).get == p2(e).get
 
   def sequence[A] (ps: List[Par[A]]): Par[List[A]] =
-    ps.foldRight[Par[List[A]]](unit(List()))((h,t) => map2(h,t)(_ :: _))
+    ps.foldLeft[Par[List[A]]](unit(List())) ((t, h) => map2(t, h)(_ :+ _))
 
 
   // Exercise 3 (CB7.6)
@@ -57,11 +60,16 @@ object Par {
      sequence(fbs)
   }
 
-  // def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] = ...
+  //def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] = fork {
+  //  val fbs: List[Par[A]] = as.filter(asyncF(f))
+  //  sequence(fbs)
+  //  }
+
 
   // Exercise 4: implement map3 using map2
-
-  // def map3[A,B,C,D] (pa :Par[A], pb: Par[B], pc: Par[C]) (f: (A,B,C) => D) :Par[D]  = ...
+  // We need a flatMap - Par[Par[D]]
+  // def map3[A,B,C,D] (pa :Par[A], pb: Par[B], pc: Par[C]) (f: (A,B,C) => D) :Par[D]  =
+  //  map2(pa, pb)((a, b) => (map(pc)(c => f(a, b, c))))
 
   // shown in the book
 
@@ -69,7 +77,8 @@ object Par {
 
   // Exercise 5 (CB7.11)
 
-  // def choiceN[A] (n: Par[Int]) (choices: List[Par[A]]) :Par[A] =
+  def choiceN[A] (n: Par[Int]) (choices: List[Par[A]]) :Par[A] =
+    es => choices(n(es).get)(es)
 
   // def choice[A] (cond: Par[Boolean]) (t: Par[A], f: Par[A]) : Par[A] =
 
@@ -90,4 +99,57 @@ object Par {
   }
 
   implicit def toParOps[A](p: Par[A]): ParOps[A] = new ParOps(p)
+}
+
+object Main {
+    def main(args:Array[String]):Unit = {
+
+        val pool = Executors.newFixedThreadPool(4)
+
+        // Exercise 1 tests
+
+        val asyncModuleSeven = Par.asyncF[Int, Int] ((_ % 7))
+        assert (Par.run (pool) (asyncModuleSeven (9)).get == 2)
+
+        // Exercise 2 tests
+
+        val oneToSixPar = List.tabulate (7) (Par.unit (_))
+        val parOneToSix = Par.unit ((0 to 6).toList)
+        assert (Par.equal (pool) (Par.sequence (oneToSixPar), parOneToSix))
+
+        //// Exercise 3 tests
+
+        //val filter = (n :Int) => n % 3 == 0
+        //val ninety = (1 to 90).toList
+        //val filteredNinety = ninety.filter (filter)
+        //assert (Par.run (pool) (Par.parFilter (ninety) (filter)).get
+        //        == filteredNinety)
+
+        //// Exercise 4 tests
+
+        //val one = Par.unit (1)
+        //assert (Par.run (pool) (Par.map3 (one, one, one) (_ + _ + _)).get == 3)
+
+        //// Exercise 5 tests
+
+        val list = List.tabulate (9) (Par.unit (_))
+        val index = 4
+        assert (Par.equal (pool) (Par.choiceN (
+                Par.unit (index)) (list), list (index)))
+
+        //val parTrue = Par.unit (true)
+        //val parFalse = Par.unit (false)
+        //assert (Par.equal (pool) (Par.choice (parTrue) (parTrue,
+        //        parFalse), parTrue))
+        //assert (Par.equal (pool) (Par.choice (parFalse) (parTrue,
+        //        parFalse), parFalse))
+
+        //// Exercise 6 tests
+
+        //val source = 3
+        //val criterion = Par.unit (source)
+        //val choice = (n: Int) => Par.unit (n * 2)
+        //assert (Par.equal (pool) (Par.chooser (criterion) (choice), choice (source)))
+        pool.shutdown()
+    }
 }
