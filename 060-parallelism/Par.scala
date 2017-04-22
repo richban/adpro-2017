@@ -68,8 +68,8 @@ object Par {
 
   // Exercise 4: implement map3 using map2
   // We need a flatMap - Par[Par[D]]
-  // def map3[A,B,C,D] (pa :Par[A], pb: Par[B], pc: Par[C]) (f: (A,B,C) => D) :Par[D]  =
-  //  map2(pa, pb)((a, b) => (map(pc)(c => f(a, b, c))))
+  def map3[A,B,C,D] (pa :Par[A], pb: Par[B], pc: Par[C]) (f: (A,B,C) => D) :Par[D]  =
+    join(map2(pa, pb)((a, b) => (map(pc)(c => f(a, b, c)))))
 
   // shown in the book
 
@@ -85,15 +85,20 @@ object Par {
 
   // Exercise 6 (CB7.13)
 
-  // def chooser[A,B] (pa: Par[A]) (choices: A => Par[B]): Par[B] =
+  def chooser[A,B] (pa: Par[A]) (choices: A => Par[B]): Par[B] =
+    es => choices(pa(es).get)(es)
 
-  // def choiceNviaChooser[A] (n: Par[Int]) (choices: List[Par[A]]) :Par[A] =
+  def choiceNviaChooser[A] (n: Par[Int]) (choices: List[Par[A]]) :Par[A] =
+    chooser[Int, A](n)(n => choices(n))
 
-  // def choiceViaChooser[A] (cond: Par[Boolean]) (t: Par[A], f: Par[A]) : Par[A] =
+  def choiceViaChooser[A] (cond: Par[Boolean]) (t: Par[A], f: Par[A]) : Par[A] =
+    chooser[Boolean, A](cond)(c => if(c) t else f)
 
   // Exercise 7 (CB7.14)
 
-  // def join[A] (a : Par[Par[A]]) :Par[A] =
+  def join[A] (a : Par[Par[A]]) :Par[A] =
+    es => a(es).get() (es)
+
 
   class ParOps[A](p: Par[A]) {
 
@@ -128,8 +133,8 @@ object Main {
 
         //// Exercise 4 tests
 
-        //val one = Par.unit (1)
-        //assert (Par.run (pool) (Par.map3 (one, one, one) (_ + _ + _)).get == 3)
+        val one = Par.unit (1)
+        assert (Par.run (pool) (Par.map3 (one, one, one) (_ + _ + _)).get == 3)
 
         //// Exercise 5 tests
 
@@ -145,10 +150,10 @@ object Main {
 
         //// Exercise 6 tests
 
-        //val source = 3
-        //val criterion = Par.unit (source)
-        //val choice = (n: Int) => Par.unit (n * 2)
-        //assert (Par.equal (pool) (Par.chooser (criterion) (choice), choice (source)))
+        val source = 3
+        val criterion = Par.unit (source)
+        val choice = (n: Int) => Par.unit (n * 2)
+        assert (Par.equal (pool) (Par.chooser (criterion) (choice), choice (source)))
         pool.shutdown()
     }
 }
