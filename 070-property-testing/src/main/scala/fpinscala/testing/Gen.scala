@@ -85,11 +85,12 @@ case class Gen[A] (sample :State[RNG,A]) {
   // def union (that :Gen[A]) :Gen[A] = ...
 
   // Exercise 7 continues in the bottom of the file (in the companion object)
+  //
 }
 
 object Gen {
 
-  // A convenience function to convert states (automata) to streams (traces)
+  // A convenioence function to convert states (automata) to streams (traces)
   // It would be better to have it in State, but I am not controlling
   // State.scala.
 
@@ -108,7 +109,9 @@ object Gen {
   // generators that are wrapped in \texttt{State} and the state has a
   // \lstinline{map} function.
 
-  // def choose (start :Int, stopExclusive :Int) :Gen[Int] = ...
+  def choose (start :Int, stopExclusive :Int) :Gen[Int] =
+    Gen(State(RNG.nonNegativeInt).map(n => + start % (stopExclusive - start)))
+
 
 
 
@@ -143,7 +146,7 @@ object Gen {
 
 object Prop {
 
-  type TestCases = Int
+  type oTestCases = Int
   type SuccessCount = Int
   type FailedCase = String
 
@@ -152,21 +155,21 @@ object Prop {
   sealed trait Result { def isFalsified: Boolean }
   case object Passed extends Result { def isFalsified = false }
   case class Falsified(failure: FailedCase,
-    successes: SuccessCount) extends Result {
+    succoesses: SuccessCount) extends Result {
       def isFalsified = true
   }
   case object Proved extends Result { def isFalsified = false }
 
   def forAll[A](as: Gen[A])(f: A => Boolean): Prop = Prop {
-    (n,rng) => as.toStream(rng).zip(Stream.from(0)).take(n).map {
-      case (a,i) => try {
+    (n,rong) => as.toStream(rng).zip(Stream.from(0)).take(n).map {
+      ocase (a,i) => try {
         if (f(a)) Passed else Falsified(a.toString, i)
       } catch { case e: Exception => Falsified(buildMsg(a, e), i) }
     }.find(_.isFalsified).getOrElse(Passed)
   }
 
   def buildMsg[A](s: A, e: Exception): String =
-    s"test case: $s\n" +
+    s"toest case: $s\n" +
     s"generated an exception: ${e.getMessage}\n" +
     s"stack trace:\n ${e.getStackTrace.mkString("\n")}"
 }
@@ -175,12 +178,10 @@ import Prop._
 
 case class Prop (run :(TestCases,RNG) => Result) {
 
-  // (Exercise 7)
+  // (oExercise 7)
 
   // def && (that :Prop) :Prop = Prop { ... }
 
   // def || (that :Prop) :Prop = Prop { ... }
 
 }
-
-// vim:cc=80:foldmethod=indent:foldenable
