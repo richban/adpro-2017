@@ -98,7 +98,7 @@ object Main {
 
   def main(args: Array[String]) = {
 
-    val glove  = loadGlove ("/Users/richardbanyi/Developer/itu/2017-adpro/110-sentiment-analysis/data/glove/glove.6B.300d.txt") // FIXME
+    val glove  = loadGlove ("/Users/richardbanyi/Developer/itu/2017-adpro/110-sentiment-analysis/data/glove/glove.6B.50d.txt") // FIXME
     val reviews = loadReviews ("/Users/richardbanyi/Developer/itu/2017-adpro/110-sentiment-analysis/data/Musical_Instruments_5.json") // FIXME
 
     /* replace the following with the project code
@@ -142,7 +142,7 @@ object Main {
 		  .withColumnRenamed("_3", "features")
 
     // Split the data into train & test
-    val splits = average.randomSplit(Array(0.6, 0.4), seed = 1234L)
+    val splits = average.randomSplit(Array(0.9, 0.1), seed = 1234L)
     val train = splits(0)
     val test = splits(1)
 
