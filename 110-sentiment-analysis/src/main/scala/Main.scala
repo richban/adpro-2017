@@ -73,8 +73,8 @@ object Main {
 
   def main(args: Array[String]) = {
 
-    val glove  = loadGlove ("/Users/richardbanyi/Developer/itu/2017-adpro/110-sentiment-analysis/data/glove/glove.6B.300d.txt") // FIXME
-    val reviews = loadReviews ("/Users/richardbanyi/Developer/itu/2017-adpro/110-sentiment-analysis/data/Musical_Instruments_5.json") // FIXME
+    val glove  = loadGlove ("data/glove/glove.6B.300d.txt") // FIXME
+    val reviews = loadReviews ("data/Musical_Instruments_5.json") // FIXME
 
     // Split the review in words
 		val tokenizer = new Tokenizer().setInputCol("text")
