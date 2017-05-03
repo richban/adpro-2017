@@ -25,9 +25,8 @@ object Main {
 
 	type Embedding       = (String, List[Double])
 	type ParsedReview    = (Integer, String, Double)
-  type TokenizedReview = (Integer, Double, WrappedArray[String])
-  type TokenizedVector = (Integer, Double, List[List[Double]])
-  type ExplodeReview   = (Integer, Double, String)
+  type TokenizedReview = (Integer, String, Double, Array[String])
+  type TokenizedVector = (Integer, Double, Array[Double], Integer)
 
 	org.apache.log4j.Logger getLogger "org"  setLevel (org.apache.log4j.Level.WARN)
 	org.apache.log4j.Logger getLogger "akka" setLevel (org.apache.log4j.Level.WARN)
@@ -71,40 +70,43 @@ object Main {
 			.withColumnRenamed ("_2", "vec")
 			.as[Embedding]
 
+	// Split the review in words
+	def tokenizer (reviews: Dataset[ParsedReview]) =
+		new Tokenizer().setInputCol("text").setOutputCol("words")
+									 .transform(reviews).as[TokenizedReview]
+
+
+	def wordsSeparator (tokens: Dataset[TokenizedReview]) =
+		tokens.flatMap { case (id, text, overall, words) =>
+				words.map ( 
+					word => ( id, if (overall > 3.0) 2.0 else if (overall == 3.0) 1.0 else 0.0, word )
+		) }.withColumnRenamed("_3", "word")
+
+
+	def features (words: Dataset[Row], glove: Dataset[Embedding]) = (
+		   words.join(glove, words("word") === glove("word")).drop("word")
+			.withColumn("count", lit(1))
+		  .as[TokenizedVector])
+			.groupByKey(_._1)
+			// Sum vectors
+			.reduceGroups(
+					(x, y) => (x._1, x._2,
+										 x._3.zip(y._3).map(z => (z._1 + z._2)), 
+										 x._4 + y._4))
+		  .map(_._2)
+		  // Average vectors
+		  .map(x => (x._1, x._2, Vectors.dense(x._3.map( d => d / x._4 ))))
+		  .withColumnRenamed("_1", "id")
+		  .withColumnRenamed("_2", "label")
+		  .withColumnRenamed("_3", "features")
+
   def main(args: Array[String]) = {
 
     val glove  = loadGlove ("data/glove/glove.6B.300d.txt") // FIXME
     val reviews = loadReviews ("data/Musical_Instruments_5.json") // FIXME
 
-    // Split the review in words
-		val tokenizer = new Tokenizer().setInputCol("text")
-      .setOutputCol("words")
-
-    val tokenized = tokenizer.transform(reviews)
-      .as[(Integer, String, Double, Array[String])]
-
-		//tokenized.show
-
-		// Seperate all the words from the reviews
-		val words = tokenized.flatMap { case (id, text, overall, words) => 
-				words.map (
-					word => ( id, if (overall > 3.0) 2.0 else if (overall == 3.0) 1.0 else 0.0, word )
-		) }.withColumnRenamed("_3", "word")
-
-		// Get the score for each word
-		val average = (
-			 words.join(glove, words("word") === glove("word")).drop("word")
-			.withColumn("count", lit(1))
-		  .as[(Integer, Double, Array[Double], Integer)]
-		) .groupByKey(_._1)
-			.reduceGroups(
-					(x, y) => (x._1, x._2, x._3.zip(y._3)
-					.map(z => (z._1 + z._2)), x._4 + y._4))
-		  .map(_._2)
-		  .map(x => (x._1, x._2, Vectors.dense(x._3.map( d => d / x._4 ))))
-		  .withColumnRenamed("_1", "id")
-		  .withColumnRenamed("_2", "label")
-		  .withColumnRenamed("_3", "features")
+    val words = wordsSeparator(tokenizer(reviews))
+    val average = features(words, glove)
 
     // specify layers for the neural network:
     val layers = Array[Int](300, 5, 4, 3)
