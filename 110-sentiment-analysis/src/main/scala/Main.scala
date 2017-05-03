@@ -15,6 +15,10 @@ import org.apache.spark.ml.linalg.Vectors
 
 import org.apache.spark.ml.classification.MultilayerPerceptronClassifier
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
+import org.apache.spark.ml.Pipeline
+import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
+import org.apache.spark.sql.Row
+import org.apache.spark.ml.linalg.Vector
 
 
 object Main {
@@ -67,56 +71,17 @@ object Main {
 			.withColumnRenamed ("_2", "vec")
 			.as[Embedding]
 
-  def tokenize (reviews: Dataset[ParsedReview]): Dataset[TokenizedReview] =
-    new Tokenizer()
-      .setInputCol("text")
-      .setOutputCol("words")
-      .transform(reviews)
-      .drop("text")
-      .as[TokenizedReview]
-
-  def explodeReview (tokens: Dataset[TokenizedReview]): Dataset[ExplodeReview] =
-    tokens.flatMap(
-      r => {
-        val (id, overall, words) = r
-        words.map( w => (id, overall, w))
-      }
-      )
-      .withColumnRenamed("_1", "id")
-      .withColumnRenamed("_2", "overall")
-      .withColumnRenamed("_3", "word")
-      .as[ExplodeReview]
-
-  /*
-  def tokenizeVector (tokens: Dataset[ExplodeReview],
-    glove: Dataset[Embedding]): Dataset[TokenizedVector] =
-      tokens.join(glove, "word")
-        .groupBy("id", "overall")
-        .avg("vec")
-        .drop("word")
-  */
-
   def main(args: Array[String]) = {
 
-    val glove  = loadGlove ("/Users/richardbanyi/Developer/itu/2017-adpro/110-sentiment-analysis/data/glove/glove.6B.50d.txt") // FIXME
+    val glove  = loadGlove ("/Users/richardbanyi/Developer/itu/2017-adpro/110-sentiment-analysis/data/glove/glove.6B.300d.txt") // FIXME
     val reviews = loadReviews ("/Users/richardbanyi/Developer/itu/2017-adpro/110-sentiment-analysis/data/Musical_Instruments_5.json") // FIXME
 
-    /* replace the following with the project code
-    glove.show
-    reviews.show
-
-    // tokenized reviews
-    val tokenized = tokenize (reviews)
-    tokenized.show
-
-    // explode words in reviews
-    val explode = explodeReview(tokenized)
-    explode.show
-    */
-
     // Split the review in words
-		val tokenizer = new Tokenizer().setInputCol("text").setOutputCol("words")
-		val tokenized = tokenizer.transform(reviews).as[(Integer, String, Double, Array[String])]
+		val tokenizer = new Tokenizer().setInputCol("text")
+      .setOutputCol("words")
+
+    val tokenized = tokenizer.transform(reviews)
+      .as[(Integer, String, Double, Array[String])]
 
 		//tokenized.show
 
@@ -141,13 +106,8 @@ object Main {
 		  .withColumnRenamed("_2", "label")
 		  .withColumnRenamed("_3", "features")
 
-    // Split the data into train & test
-    val splits = average.randomSplit(Array(0.9, 0.1), seed = 1234L)
-    val train = splits(0)
-    val test = splits(1)
-
     // specify layers for the neural network:
-    val layers = Array[Int](50, 5, 4, 3)
+    val layers = Array[Int](300, 5, 4, 3)
 
     val trainer = new MultilayerPerceptronClassifier()
       .setLayers(layers)
@@ -155,15 +115,43 @@ object Main {
       .setSeed(1234L)
       .setMaxIter(100)
 
-    // train the model
-    val model = trainer.fit(train)
-    // compute accuracy on the test set
-    val result = model.transform(test)
-    val predictionAndLabels = result.select("prediction", "label")
+    // Configure the ML Pipeline with stages: tokenizer, words, average
+    val pipeline = new Pipeline()
+      .setStages(Array(trainer))
+
+    // Construct a grid of parameters to searchover
+    // No parameter search
+    val paramGrid = new ParamGridBuilder().build()
 
     val evaluator = new MulticlassClassificationEvaluator()
       .setMetricName("accuracy")
-      println("Accuracy: " + evaluator.evaluate(predictionAndLabels))
+      .setLabelCol("label")
+      .setPredictionCol("prediction")
+
+
+    val cv = new CrossValidator()
+      .setEstimator(pipeline)
+      .setEvaluator(evaluator)
+      .setEstimatorParamMaps(paramGrid)
+      .setNumFolds(10)
+
+    // val splits = average.randomSplit(Array(0.8, 0.2), seed = 1234L)
+    // val train = splits(0)
+    // val test = splits(1)
+
+
+    val model = cv.fit(average)
+
+    model.avgMetrics.foreach(println)
+
+    /* Make predictions on test documents. cvModel uses the best model found (lrModel).
+    model.transform(test)
+      .select("id", "prediction")
+      .collect()
+      .foreach { case Row(id: Long, prediction: Double) =>
+        println(s"($id) --> prediction=$prediction")
+      }
+    */
 
     spark.stop
   }
