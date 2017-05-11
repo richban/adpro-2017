@@ -9,6 +9,9 @@ import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.sql.{Dataset, Row, SparkSession}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.functions._
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
+import scala.collection.parallel.immutable._
 
 object Main {
 
@@ -21,6 +24,7 @@ object Main {
 		.appName ("Sentiment")
 		.master  ("local[9]")
 		.getOrCreate
+	val sc = spark.sparkContext
 
 	import spark.implicits._
 
@@ -57,25 +61,26 @@ object Main {
 
 	// Split the review in words
 	def tokenizer (reviews: Dataset[ParsedReview]) =
-		new Tokenizer().setInputCol("text").setOutputCol("words")
-									 .transform(reviews).as[(Integer, String, Double, Array[String])]
+		new Tokenizer()
+			.setInputCol("text").setOutputCol("words")
+			.transform(reviews).as[(Integer, String, Double, Array[String])]
 
 	def wordsSeperator (tokens: Dataset[(Integer, String, Double, Array[String])]) =
 		tokens.flatMap { case (id, text, overall, words) =>
-				words.map ( 
-					word => ( id, if (overall > 3.0) 2.0 else if (overall == 3.0) 1.0 else 0.0, word ) 
+			words.map (
+				word => ( id, if (overall > 3.0) 2.0 else if (overall == 3.0) 1.0 else 0.0, word )
 		) }.withColumnRenamed("_3", "word")
 
 	def features (words: Dataset[Row], glove: Dataset[Embedding]) = (
 		   words.join(glove, words("word") === glove("word")).drop("word")
-			.withColumn("count", lit(1))
+		  .withColumn("count", lit(1))
 		  .as[(Integer, Double, Array[Double], Integer)])
-			.groupByKey(_._1)
-			// Sum vectors
-			.reduceGroups(
-					(x, y) => (x._1, x._2,
-										 x._3.zip(y._3).map(z => (z._1 + z._2)), 
-										 x._4 + y._4))
+		  .groupByKey(_._1)
+		   // Sum vectors
+		  .reduceGroups(
+			(x, y) => (x._1, x._2,
+					   x._3.zip(y._3).map(z => (z._1 + z._2)), 
+					   x._4 + y._4))
 		  .map(_._2)
 		  // Average vectors
 		  .map(x => (x._1, x._2, Vectors.dense(x._3.map( d => d / x._4 ))))
@@ -83,7 +88,7 @@ object Main {
 		  .withColumnRenamed("_2", "label")
 		  .withColumnRenamed("_3", "features")
 
-	def perceptron (n: Int, splits: Array[Dataset[Row]], maxIter: Int) : Double = 
+	def perceptron (n: Int, splits: Array[Dataset[Row]], maxIter: Int) : Double =
 	{
 		val layers = Array[Int](50, 5, 4, 3)
 		val trainer = new MultilayerPerceptronClassifier()
@@ -93,13 +98,8 @@ object Main {
 			.setMaxIter (maxIter)
 		val evaluator = new MulticlassClassificationEvaluator().setMetricName("accuracy")
 
-		val first = if (n == 0) 1 else 0
-		val train = (first+1 to 9).foldLeft (splits(first)) (
-			(bcc, m) => {
-				if (m != n) bcc.union (splits(m))
-				else bcc
-				}
-			)
+		val train = splits.filter(m => m != n).reduce(_ union _)
+
 		val test = splits(n)
 		val model = trainer.fit(train)
 		val result = model.transform(test)
@@ -107,43 +107,43 @@ object Main {
 		evaluator.evaluate (result.select("prediction", "label"))
 	}
 
-	def accuracy (glove: Dataset[Embedding], reviews: Dataset[ParsedReview]) = {
+	def accuracy (glove: Dataset[Embedding], reviews: Dataset[ParsedReview]): List[Double] = {
 		// Seperate all the words from the reviews
-		//val tokenized = tokenizer(reviews)
-    //tokenized.show
-    //println(tokenized.take(1).head._4.length)
+		val words = wordsSeperator(tokenizer(reviews))
 
-    val words = wordsSeperator(tokenizer(reviews))
-    //words.groupBy("_1").count().filter($"_1" === 0).show
-    // Get the score for each word
+		// Get the score for each word
 		val average = features(words, glove)
-    //println(average.collect()(0))
-    //average.printSchema()
-    // average.printSchema()
-		/  Multilayer perceptron classifier
+
+		// Multilayer perceptron classifier
 		val splits = average.randomSplit (
 			Array(.1, .1, .1, .1, .1, .1, .1, .1, .1, .1), seed = 1234L)
 
-		(0 to 9).foldLeft (List[Double]()) (
-			(acc, n) => { perceptron(n, splits, 8/*Max iterations*/) :: acc })
-  }
+		(0 to 9).par.map( x => perceptron(x, splits, 8/*Max iterations*/) ).toList
+	}
 
 	def run () = {
 		val glove  = loadGlove ("data/glove/glove.6B.50d.txt")
-		val reviews = loadReviews ("data/Musical_Instruments_5_small.json")		
+		val reviews = loadReviews ("data/Musical_Instruments_5.json")		
 
-    accuracy(glove, reviews)
-		/* val accuracyList = accuracy(glove, reviews)
+		val accuracyList = accuracy(glove, reviews)
+
+		val average_accuracy = accuracyList.reduce (_+_) / accuracyList.length
+		val accurac_variance = accuracyList.foldLeft (0.0) (
+			(acc, elem) => {
+				acc + Math.pow (Math.abs (elem - average_accuracy), 2)
+			}
+		) / accuracyList.length
+
 		println ("")
-		println ("###########################################")
-		println ("### AVERAGE ACCURACY: " + accuracyList.foldLeft(0.0)(_+_) + " ###")
-		println ("###########################################")
+		println ("############################################")
+		println ("### AVERAGE ACCURACY: " + average_accuracy + " ###")
+		println ("### VARIANCE:   +/- " + accurac_variance + " ###")
+		println ("############################################")
 		println ("")
-    */
+
 		spark.stop
 	}
 
 	def main(args: Array[String]) = run()
 
 }
-
