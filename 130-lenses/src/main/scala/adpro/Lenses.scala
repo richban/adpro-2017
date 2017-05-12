@@ -5,7 +5,7 @@
 // Monocle is a library providing lenses for Scala (one of many in fact)
 //
 // Tutorial for Monocle lenses is here:
-// http://julien-truffaut.github.io/Monocle/
+// https://github.com/julien-truffaut/Monocle/blob/master/docs/src/main/tut/lens.md
 //
 // We will reimplement some Lenses today, but we shall reuse some basic
 // infrastructure from Monocle.  Monocle is *probably* the most popular Lens
@@ -13,7 +13,7 @@
 // shapeless.
 //
 // Documentation is sparse so far, but the source code is here:
-// https://github.com/julien-truffaut/Monocle
+// https://github.com/julien-truffaut/Monocle/tree/v1.2.0-M1
 //
 // And some examples are here (and in other files in the same directory):
 // https://github.com/julien-truffaut/Monocle/blob/master/example/src/test/scala/monocle/LensExample.scala
@@ -142,7 +142,7 @@ object Lenses {
   // the copy.  For instance itu.copy (students = itu.students.tail) creates a
   // copy of ITU without the first student.
 
-  // val itu1 = ... TODO (ca. 4 lines)
+  // val itu1 = ... TODO
 
   // There is a test in LensesSpec to check whether  you did what expected.
   //
@@ -240,9 +240,10 @@ object Lenses {
 
 
   // Exercise 7. Use filterIndex(p) to only capitalize city names of the
-  // students on the list whose name satisfies predicate (p).  filterIndex is a
-  // traversal, like 'each' above. Recall that ^|->> is used to compose (append)
-  // a traversal and ^|-> is used to append a lense.
+  // students on the list whose name satisfies predicate (p). Let's capitalize
+  // the names of students whose name begins with letter A.  The filterIndex
+  // combinator is a traversal, like 'each' above. Recall that ^|->> is used to
+  // compose (append) a traversal and ^|-> is used to append a lense.
 
   // val itu4 = ... ca. 3 lines TODO
 
