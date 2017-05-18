@@ -5,7 +5,7 @@
 // Monocle is a library providing lenses for Scala (one of many in fact)
 //
 // Tutorial for Monocle lenses is here:
-// https://github.com/julien-truffaut/Monocle/blob/master/docs/src/main/tut/lens.md
+// http://julien-truffaut.github.io/Monocle/
 //
 // We will reimplement some Lenses today, but we shall reuse some basic
 // infrastructure from Monocle.  Monocle is *probably* the most popular Lens
@@ -13,11 +13,10 @@
 // shapeless.
 //
 // Documentation is sparse so far, but the source code is here:
-// https://github.com/julien-truffaut/Monocle/tree/v1.2.0-M1
+// https://github.com/julien-truffaut/Monocle/
 //
 // And some examples are here (and in other files in the same directory):
 // https://github.com/julien-truffaut/Monocle/blob/master/example/src/test/scala/monocle/LensExample.scala
-//
 // We are now advanced enough in Scala and functional programming to understand
 // a lot of it :)
 //
