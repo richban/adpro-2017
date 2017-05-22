@@ -26,13 +26,13 @@ object Monoid {
 
   // Exercise 1
 
-  val intAddition = new Monoid[Integer] {
-    def op(a1: Integer, a2: Integer) = a1 + a2
+  val intAddition = new Monoid[Int] {
+    def op(a1: Int, a2: Int) = a1 + a2
     val zero = 0
   }
 
-  val intMultiplication = new Monoid[Double] {
-    def op(a1: Double, a2: Double) = a1 * a2
+  val intMultiplication = new Monoid[Int] {
+    def op(a1: Int, a2: Int) = a1 * a2
     val zero = 1
   }
 
@@ -62,9 +62,9 @@ object Monoid {
 
   // Exercise 3
   def endoMonoid[A] = new Monoid[endoFunction[A]] {
-    def op(a1: endoFunction[A], a2: endoFunction[A]) = 
+    def op(a1: endoFunction[A], a2: endoFunction[A]) =
       a => a1(a2(a))
-    val zero = identity[A]
+    val zero = identity[A] _
   }
 
   // Exercise 4 is solved in MonoidSpec.scala
@@ -82,7 +82,7 @@ object Monoid {
 
 }
 
-
+/*
 trait Foldable[F[_]] {
 
   def foldRight[A,B] (as: F[A]) (z: B) (f: (A,B) => B): B
@@ -108,5 +108,5 @@ object Foldable extends Foldable[List] {
   // foldRight)
   // def foldMap[A,B] (as: List[A]) (f: A => B) (mb: Monoid[B]): B = ...
 }
-
+*/
 // vim:cc=80:tw=80
