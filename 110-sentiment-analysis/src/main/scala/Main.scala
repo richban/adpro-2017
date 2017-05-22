@@ -79,7 +79,7 @@ object Main {
 		   // Sum vectors
 		  .reduceGroups(
 			(x, y) => (x._1, x._2,
-					   x._3.zip(y._3).map(z => (z._1 + z._2)), 
+					   x._3.zip(y._3).map(z => (z._1 + z._2)),
 					   x._4 + y._4))
 		  .map(_._2)
 		  // Average vectors
