@@ -26,22 +26,46 @@ object Monoid {
 
   // Exercise 1
 
-  // val intAddition =
-  // val intMultiplication =
-  // val booleanOr =
-  // val booleanAnd =
+  val intAddition = new Monoid[Integer] {
+    def op(a1: Integer, a2: Integer) = a1 + a2
+    val zero = 0
+  }
+
+  val intMultiplication = new Monoid[Double] {
+    def op(a1: Double, a2: Double) = a1 * a2
+    val zero = 1
+  }
+
+  val booleanOr = new Monoid[Boolean] {
+    def op(a1: Boolean, a2: Boolean) = a1 || a2
+    val zero = false
+  }
+
+  val booleanAnd = new Monoid[Boolean] {
+    def op(a1: Boolean, a2: Boolean) = a1 && a2
+    val zero = true
+  }
 
   // Exercise 2
 
-  // def optionMonoid[A] = ...
+  def optionMonoid[A] = new Monoid[Option[A]] {
+    def op(a1: Option[A], a2: Option[A]) = a1 orElse a2
+    val zero = None
+  }
 
   def dual[A] (m :Monoid[A]) = new Monoid[A] {
     def op (a1: A, a2: A) = m.op(a2,a1)
     val zero = m.zero
   }
 
+  type endoFunction[A] = A => A
+
   // Exercise 3
-  // def endoMonoid[A] =
+  def endoMonoid[A] = new Monoid[endoFunction[A]] {
+    def op(a1: endoFunction[A], a2: endoFunction[A]) = 
+      a => a1(a2(a))
+    val zero = identity[A]
+  }
 
   // Exercise 4 is solved in MonoidSpec.scala
 
