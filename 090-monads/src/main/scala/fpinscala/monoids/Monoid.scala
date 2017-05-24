@@ -88,7 +88,7 @@ object Monoid {
 
 }
 
-/*
+
 trait Foldable[F[_]] {
 
   def foldRight[A,B] (as: F[A]) (z: B) (f: (A,B) => B): B
@@ -99,20 +99,28 @@ trait Foldable[F[_]] {
 
   // Exercise 9 (CB 10.15)
 
-  // def toList[A] (fa: F[A]) :List[A]
+  def toList[A] (fa: F[A]) :List[A] =
+    foldRight[A, List[A]](fa)(Nil)((a, b) => a::b)
 }
 
 // Exercise 8 (CB 10.12 We just do Foldable[List])
 
 object Foldable extends Foldable[List] {
 
-  // def foldRight[A,B] (as: List[A]) (b: B) (f: (A,B) => B): B = ...
+  def foldRight[A,B] (as: List[A]) (b: B) (f: (A,B) => B): B = as match {
+      case Nil => b
+      case a::as1 => f(a, foldRight(as1)(b)(f))
+    }
 
-  // def foldLeft[A,B] (as: List[A]) (b: B) (f: (B,A) => B): B = ...
+  def foldLeft[A,B] (as: List[A]) (b: B) (f: (B,A) => B): B = as match {
+    case Nil => b
+    case a::as1 => foldLeft(as1)(f(b, a))(f)
+  }
 
   // using foldLeft would not be a good idea for Streams (there I would use
   // foldRight)
-  // def foldMap[A,B] (as: List[A]) (f: A => B) (mb: Monoid[B]): B = ...
+  def foldMap[A,B] (as: List[A]) (f: A => B) (mb: Monoid[B]): B =
+    foldRight(as)(mb.zero)((a, b) => mb.op(f(a), b))
 }
-*/
+
 // vim:cc=80:tw=80
