@@ -68,4 +68,8 @@ object MonoidSpec extends Properties("Monoids..") {
   // Exercise 7 (the testing part)
 
   property ("productMonoid is a monoid") = monoid (productMonoid(stringMonoid)(stringMonoid))
+
+  import Foldable._
+
+  assert(Foldable.foldRight(List(1, 2, 3))(0)(_+_) == 6)
 }
