@@ -38,18 +38,34 @@ object MonoidSpec extends Properties("Monoids..") {
 
   // Exercise 5
 
-  // def homomorphism[A :Arbitrary,B :Arbitrary]
-  //  (ma: Monoid[A]) (f: A => B) (mb: Monoid[B]) =
+  def homomorphism[A :Arbitrary,B :Arbitrary]
+    (ma: Monoid[A]) (f: A => B) (mb: Monoid[B]) :Prop =
+      forAll {(a1: A, a2: A) =>
+        mb.op(f(a1), f(a2)) == f(ma.op(a1, a2)) }
 
-  // def isomorphism[A :Arbitrary, B :Arbitrary] ...
 
-  // property ("stringMonoid and listMonoid[Char] are isomorphic") = ...
+  property ("stringMonoid and listMonoid[Char] are isomorphic") = homomorphism(stringMonoid)(x => x.toList)(listMonoid[Char])
 
+
+  def isomorphism[A :Arbitrary, B :Arbitrary]
+    (mb: Monoid[B]) (f1: B => A) (ma: Monoid[A]) (f2: A => B): Prop =
+      forAll {(b1: B, b2: B, a1: A, a2: A) =>
+        ma.op(f1(b1), f1(b2)) == f1(mb.op(b1, b2)) &&
+        mb.op(f2(a1), f2(a2)) == f2(ma.op(a1, a2))
+      }
+
+  property ("stringMonoid and listMonoid[Char] are isomorphic") =  homomorphism(stringMonoid)(x => x.toList)(listMonoid[Char]) && 
+     homomorphism(listMonoid[Char])(x => x.mkString)(stringMonoid)
+
+
+  property ("stringMonoid and listMonoid[Char] are isomorphic") =
+    isomorphism(stringMonoid)(x => x.toList)(listMonoid[Char])(x => x.mkString)
   // Exercise 6
 
-  // property ("booleanOr and booleanAnd are isomorphic") =
+  property ("booleanOr and booleanAnd are isomorphic") =
+    isomorphism(booleanOr)(a => !a)(booleanAnd)(a => !a)
 
   // Exercise 7 (the testing part)
 
-  // property ("productMonoid is a monoid") =
+  property ("productMonoid is a monoid") = monoid (productMonoid(stringMonoid)(stringMonoid))
 }

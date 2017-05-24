@@ -78,7 +78,13 @@ object Monoid {
   // with scala check for instance by composing an Option[Int] monoid with a
   // List[String] monoid and running through our monoid laws.
 
-  // def productMonoid[A,B] (ma: Monoid[A]) (mb: Monoid[B]) =
+  def productMonoid[A,B] (ma: Monoid[A]) (mb: Monoid[B]) =
+    new Monoid[(A, B)] {
+      def op(a1: (A, B), a2: (A, B)) = (ma.op(a1._1, a2._1),
+                                          mb.op(a1._2, a2._2))
+
+      val zero = (ma.zero, mb.zero)
+    }
 
 }
 
