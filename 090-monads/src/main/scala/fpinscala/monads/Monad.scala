@@ -39,12 +39,21 @@ trait Monad[F[_]] {
   def map[A,B] (ma: F[A]) (f: A => B) :F[B] =
     flatMap (ma) (a => unit (f(a)))
 
+  // member functions
   def map2[A, B, C] (ma: F[A], mb: F[B]) (f: (A,B) => C): F[C] =
     flatMap (ma) (a => map (mb) (b => f(a,b)))
 
   // Exercise 13 (CB11.3)
 
-  // def sequence[A] (lfa: List[F[A]]): F[List[A]] =
+  def sequence[A] (lfa: List[F[A]]): F[List[A]] =
+    lfa.foldRight[F[List[A]]](unit(Nil))((fa, fb) =>
+        flatMap(fb)(b => map (fa)(a => a :: b) ))
+    /*
+    lfa.foldRight[F[List[A]]](unit(Nill))((fa, fb) => for {
+      b <- fb
+      a = fa
+    } yield a :: b) 
+    */
 
   // traverse seems to simply sequence results of mapping.  I do not think that
   // it appeared in our part. You can uncomment it once you have sequence.
@@ -68,8 +77,16 @@ object Monad {
 
   // Exercise 12 (CB11.1)
 
-  // val optionMonad =
+  val optionMonad =new Monad[Option]{
+    def unit[A] (a: => A): Option[A] = Option(a)
+    def flatMap[A, B] (ma: Option[A]) (f: A => Option[B]): Option[B] = 
+      ma flatMap f
+  }
 
-  // val listMonad =
+  val listMonad = new Monad[List] {
+    def unit[A] (a: => A): List[A] = List(a)
+    def flatMap[A, B] (ma: List[A]) (f: A => List[B]): List[B] =
+      ma flatMap f
+  }
 
 }
