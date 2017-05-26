@@ -57,11 +57,13 @@ trait Monad[F[_]] {
 
   // traverse seems to simply sequence results of mapping.  I do not think that
   // it appeared in our part. You can uncomment it once you have sequence.
-  // def traverse[A,B] (la: List[A]) (f: A => F[B]): F[List[B]] = sequence(la.map (f))
+  def traverse[A,B] (la: List[A]) (f: A => F[B]): F[List[B]] = sequence(la.map (f))
 
   // Exercise 14 (CB11.4)
 
-  // def replicateM[A] (n: Int, ma: F[A]): F[List[A]] =
+  def replicateM[A] (n: Int, ma: F[A]): F[List[A]] =
+    //sequence(List.fill(n)(ma))
+    sequence((1 to n).map((m: Int) => ma).toList)
 
   def join[A] (mma: F[F[A]]): F[A] = flatMap (mma) (ma => ma)
 
@@ -69,7 +71,7 @@ trait Monad[F[_]] {
 
   // Exercise 16 (CB11.7)
 
-  // def compose[A,B,C] (f: A => F[B], g: B => F[C]): A => F[C] =
+  //def compose[A,B,C] (f: A => F[B], g: B => F[C]): A => F[C] =
 
 }
 
