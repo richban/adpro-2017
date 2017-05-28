@@ -31,11 +31,13 @@ object data {
 
     // page 3
 
-    // def toList[A] (fa: F[A]) :List[A] = ...
+    def toList[A] (fa: F[A]) :List[A] =
+      reduceR[A, List[A]]((a, b) => a :: b)(fa, Nil)
 
     // page 6
     //
-    // def toTree[A] (fa :F[A]) :FingerTree[A] = ...
+    def toTree[A] (fa :F[A]) :FingerTree[A] =
+      reduceR[A, FingerTree[A]]((a, b) => FingerTree.addL(a, b))(fa, Empty())
   }
 
   // Types for Finger trees after Hinze and Pattersoni (page 4)
@@ -58,8 +60,8 @@ object data {
     // the operations both as methods and functions.
     // Uncomment them once you have implemented the corresponding functions.
 
-    // def addL[B >:A] (b: B) :FingerTree[B] = FingerTree.addL (b,this)
-    // def addR[B >:A] (b: B) :FingerTree[B] = FingerTree.addR (this,b)
+    def addL[B >:A] (b: B) :FingerTree[B] = FingerTree.addL (b,this)
+    def addR[B >:A] (b: B) :FingerTree[B] = FingerTree.addR (this,b)
     // def toList :List[A] = FingerTree.toList (this)
 
     // def headL :A = FingerTree.headL (this)
@@ -125,8 +127,11 @@ object data {
 
     // page 3, top
     //
-    // def reduceR[A,Z] (opr: (A,Z) => Z) (d: Digit[A], z: Z) :Z = ...
-    // def reduceL[A,Z] (opl: (Z,A) => Z) (z: Z, d: Digit[A]) :Z = ...
+    def reduceR[A,Z] (opr: (A,Z) => Z) (d: Digit[A], z: Z) :Z =
+      d.foldRight(z)(opr)
+
+    def reduceL[A,Z] (opl: (Z,A) => Z) (z: Z, d: Digit[A]) :Z =
+      d.foldLeft(z)(opl)
 
     // Digit inherits toTree from Reduce[Digit] that we will also apply to other
     // lists, but this object is a convenient place to put it (even if not all
@@ -143,12 +148,18 @@ object data {
   }
 
 
-  object Node // extends Reduce[Node] {
+  object Node extends Reduce[Node] {
 
     // page 5, top
-    // def reduceR[A,Z] (opr: (A,Z) => Z) (n :Node[A], z: Z) :Z = ...
-    // def reduceL[A,Z] (opl: (Z,A) => Z) (z: Z, n :Node[A]) :Z = ...
-  // }
+    def reduceR[A,Z] (opr: (A,Z) => Z) (n :Node[A], z: Z) :Z = n match {
+      case Node2(a, b) => opr(a, opr(b, z))
+      case Node3(a, b, c) => opr(a, opr(b, opr(c, z)))
+    }
+    def reduceL[A,Z] (opr: (Z,A) => Z) (z: Z, n :Node[A]) :Z = n match {
+      case Node2(a, b) => opr(opr(z, a), b)
+      case Node3(a, b, c) => opr(opr(opr(z, a), b), c)
+    }
+  }
 
 
 
@@ -157,16 +168,36 @@ object data {
   object FingerTree { // extends Reduce[FingerTree] { // uncomment once the interface is implemented
 
     // page 5
-    // def reduceR[A,Z] (opr: (A,Z) => Z) (t: FingerTree[A], z: Z) :Z = ...
+    def reduceR[A,Z] (opr: (A,Z) => Z) (t: FingerTree[A], z: Z) :Z = t match {
+      case Empty () => z
+      case Single(a) => opr(a, z)
+      case Deep(pf, m, sf) => {
+        val rsf = Digit.reduceR[A,Z](opr)(sf, z)
+        val rm = FingerTree.reduceR[Node[A],Z]((n, z) => Node.reduceR(opr)(n, z))(m, rsf)
+        Digit.reduceR[A, Z](opr)(pf, rm)
+      }
+    }
 
     // def reduceL[A,Z] (opl: (Z,A) => Z) (z: Z, t: FingerTree[A]) :Z = ...
 
     // page 5 bottom (the left triangle); Actually we could use the left
     // triangle in Scala but I am somewhat old fashioned ...
 
-    // def addL[A] ... = ...
+    def addL[A] (a: A, t: FingerTree[A]) : FingerTree[A] = t match {
+      case Empty () => Single(a)
+      case Single(b) => Deep(Digit(a), Empty(), Digit(b))
+      case Deep(pf, m, sf) => if (pf.length < 4) Deep(a::pf, m, sf) else
+                                Deep(Digit(a, pf.head), addL(Node3(pf(1), pf(2), pf(3)), m), sf)
+    }
 
-    // def addR[A] ... = ...
+
+
+    def addR[A] (t: FingerTree[A], a: A) : FingerTree[A] = t match {
+      case Empty () => Single(a)
+      case Single(b) => Deep(Digit(b), Empty(), Digit(a))
+      case Deep(pf, m, sf) => if (sf.length < 4) Deep(pf, m, a::sf) else
+                                  Deep(pf, addR(m, Node3(sf(1), sf(2), sf(3))), Digit(a, sf.head))
+    }
 
     // page 6
     //
