@@ -20,6 +20,7 @@ trait Functor[F[_]] {
 object Functor {
 
   val ListFunctor = new Functor[List] {
+    // implementation differs between data types
     def map[A,B] (as: List[A]) (f: A => B): List[B] = as.map (f)
   }
 
@@ -33,6 +34,7 @@ object Functor {
 
 trait Monad[F[_]] {
 
+  // FlatMap + unit you can define map using FlatMap + Unit
   def unit[A]  (a: => A): F[A]
   def flatMap[A,B] (ma: F[A]) (f: A => F[B]) :F[B]
 
