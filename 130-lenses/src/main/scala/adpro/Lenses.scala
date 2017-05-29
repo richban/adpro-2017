@@ -55,11 +55,18 @@ object Lenses {
 
   // page 6 in Foster et al.:
 
-  // val l2 : Lens[String, (String,Int)] = TODO
+  def getl2 (s: String): (String, Int) = (s, 0)
+  // set ( value, source)
+  def setl2 (f: (String, Int))(s: String): String = f._1
+
+  val l2 = Lens[String, (String,Int)] (getl2)(setl2)
 
   // page 7 in Foster et al.
 
-  // val l3 : Lens[(String,Int), String] = TODO
+  def getl3 (s: (String, Int)): String = s._1
+  def setl3 (f: String)(s: (String, Int)): (String, Int) = (f, s._2)
+
+  val l3 = Lens[(String,Int), String] (getl3)(setl3)
 
 
 

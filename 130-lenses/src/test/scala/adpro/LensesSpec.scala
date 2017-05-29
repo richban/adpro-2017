@@ -31,35 +31,46 @@ class LensesSpec extends FlatSpec with Checkers {
   // Write the laws polymorphically for *any* total lens and instantiate it for
   // concrete lenses.
 
-  // def PutGet[C,A] (l: Lens[C,A])
-  //   (implicit aA: Arbitrary[A], aC: Arbitrary[C]) :Prop = TODO
+  def PutGet[C,A] (l: Lens[C,A])
+     (implicit aA: Arbitrary[A], aC: Arbitrary[C]) :Prop =
+       forAll { (a: A, c: C) =>
+        l.get(l.set(a) (c)) == a
+       }
 
-  // def GetPut[C,A] ... TODO
+  def GetPut[C,A] (l: Lens[C,A])
+      (implicit aA: Arbitrary[A], aC: Arbitrary[C]) :Prop =
+        forAll {(a: A, c: C) =>
+          l.set(l.get(c))(c) == c
+        }
 
-  // def PutPut[C,A] ... TODO
+  def PutPut[C,A] (l: Lens[C, A])
+      (implicit aA: Arbitrary[A], aC: Arbitrary[C]) : Prop =
+        forAll {(a: A, c: C) =>
+          l.set(a)(l.set(a)(c)) == c
+        }
 
   // specification of a total lense laws (refers to the laws above)
-  // def wellBehavedTotalLense[A,C] (l: Lens[C,A])
-  //   (implicit ac: Arbitrary[C], aa: Arbitrary[A]) = {
-  //   it should "obey the PutGet law" in check { PutGet (l) }
-  //   it should "obey the GetPut law" in check { GetPut (l) }
-  // }
+  def wellBehavedTotalLense[A,C] (l: Lens[C,A])
+     (implicit ac: Arbitrary[C], aa: Arbitrary[A]) = {
+     it should "obey the PutGet law" in check { PutGet (l) }
+     it should "obey the GetPut law" in check { GetPut (l) }
+  }
 
-  // def veryWellBehavedTotalLense[A,C] (l: Lens[C,A])
-  //   (implicit aC: Arbitrary[C], aA: Arbitrary[A]) = {
-  //     it should behave like wellBehavedTotalLense (l)
-  //     it should "obey the PutPut law" in check { PutPut (l) }
-  // }
-  //
+  def veryWellBehavedTotalLense[A,C] (l: Lens[C,A])
+     (implicit aC: Arbitrary[C], aA: Arbitrary[A]) = {
+       it should behave like wellBehavedTotalLense (l)
+       it should "obey the PutPut law" in check { PutPut (l) }
+  }
+
   // Calling above tests for l1 l2 and l3 (just uncomment and run)
 
   // "l1" should behave like wellBehavedTotalLense (l1) // will fail GetPut see p. 6
   // "l2" should behave like wellBehavedTotalLense (l2) // will fail PutGet see p. 6
-  // "l3" should behave like wellBehavedTotalLense (l3)
-  // // it should behave like veryWellBehavedTotalLense (l3)
+  "l3" should behave like wellBehavedTotalLense (l3)
+  //"l3_1" should behave like veryWellBehavedTotalLense (l3)
 
-  // "codiag[Int]" should behave like veryWellBehavedTotalLense (codiag[Int])
-  // "codiag[String]" should behave like veryWellBehavedTotalLense (codiag[String])
+  //"codiag[Int]" should behave like veryWellBehavedTotalLense (codiag[Int])
+  //"codiag[String]" should behave like veryWellBehavedTotalLense (codiag[String])
   // "codiag1[Int]" should behave like veryWellBehavedTotalLense (codiag1[Int])
   // "codiag1[String]" should behave like veryWellBehavedTotalLense (codiag1[String])
 
