@@ -107,7 +107,9 @@ object Q3 {
    * where z = M.zero and + is M.op .
    */
 
-  def foldBack[A] (l :List[A]) (implicit M :Monoid[A]) :A = ??? // complete
+  def foldBack[A] (l :List[A]) (implicit M :Monoid[A]) :A =
+    (M.zero::l).foldRight(l.foldLeft(M.zero)(M.op))(M.op)
+
 
 }
 
