@@ -224,7 +224,19 @@ object Q6 {
    * Include the type of the lens (partial/total), and the put and get function.
    */
 
-  def leftFT[A] = ???
+  def getFT (t: FingerTree[A]): Option[A] = viewL(t)  match {
+    case NilTree () => None
+    case ConsL(hd, tl) => Some(hd)
+  }
+
+  def setFT(a: A)(t: FingerTree[A]): FingerTree[A] = viewL(t) match {
+    // set empty cause its a tree
+    case NilTree () => Empty()
+    case ConsL(hd, tl) => tl.addL(a) //to the tail - it's a tree
+  }
+
+  // Optional will wrap => option[A]
+  def leftFT[A] = Optional[FingerTree[A], A] (getFT)(setFT)
 
 
 
@@ -275,7 +287,7 @@ object Question7 {
 
   val arbitraryInt :Gen[Int] = ??? // assume that this exists.
 
-  val multiplesOf10 = ??? // complete this
+  val multiplesOf10 = arbitrary.map(n => (n/10) * 10)
 
 
 
