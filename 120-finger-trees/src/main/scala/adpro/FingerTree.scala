@@ -98,9 +98,11 @@ object data {
   // In the paper views are generic in the type of tree used. Here I make them
   // fixed for FingerTrees.
 
-  //  sealed trait ViewL[+A]
-  //  case class NilTree () extends ViewL[Nothing]
-  //  case class ConsL[A] (hd: A, tl: FingerTree[A]) extends ViewL[A]
+  sealed trait ViewL[+A]
+  case class NilTree () extends ViewL[Nothing]
+  case class ConsL[A] (hd: A, tl: FingerTree[A]) extends ViewL[A]
+  // ConsL is a constructor of the ViewL algebraic data type
+  // pattern matching <=> algebraic datatype
 
   // Left extractors for Finger Trees (we use the same algorithm as viewL in the
   // paper). You can do this, once you implemented the views the book way.
@@ -110,20 +112,32 @@ object data {
   // See an example extractor implemented for Digit below (Digit.unapply)
 
   object NilTree { // we use the same extractor for both left and right views
-    // def unapply[A] (t: FingerTree[A]) :Boolean = ...
+    def unapply[A] (t: FingerTree[A]) :Boolean = t match {
+      case Empty () => true
+      case _ => false
+    }
   }
 
+  // ConsL returnt the head and the tail - used only for patter matching.
   object ConsL {
-    // def unapply[A] (t: FingerTree[A]) :Option[(A,FingerTree[A])] = ...
+    def unapply[A] (t: FingerTree[A]) :Option[(A,FingerTree[A])] = t match {
+      case Empty () => None
+      case Single(a) => Some((a, Empty()))
+      case Deep(pf, m, sf) => Some((pf.head, FingerTree.deepL(pf.tail, m, sf)))
+    }
   }
 
   object ConsR {
-    // def unapply[A] (t: FingerTree[A]) :Option[(FingerTree[A],A)] = ...
+    def unapply[A] (t: FingerTree[A]) :Option[(FingerTree[A],A)] = t match {
+        case Empty () => None
+        case Single(a) => Some(Empty(), a)
+        case Deep(pf, m, sf) => Some((FingerTree.deepR(pf, m, sf.tail), sf.head))
+    }
   }
 
   // several convenience operations for Digits.
   //
-  object Digit { // extends Reduce[Digit] { // uncomment once the interfaces are provided
+  object Digit extends Reduce[Digit] { // uncomment once the interfaces are provided
 
     // page 3, top
     //
@@ -216,23 +230,55 @@ object data {
     // In Haskell we need to call viewL(t) to pattern match on views.  In Scala,
     // with extractors in place, we can directly pattern match on t.
     //
-    // def viewL[A] (t: FingerTree[A]) :ViewL[A] = ...
+    def viewL[A] (t: FingerTree[A]) :ViewL[A] = t match {
+        case Empty () => NilTree ()
+        case Single(a) => ConsL(a, Empty())
+        case Deep(pf, m, sf) => ConsL(pf.head, deepL(pf.tail, m, sf))
+    }
 
     // page 6
     //
     // A smart constructor that allows pr to be empty
-    // def deepL[A] (pr: Digit[A], m: FingerTree[Node[A]], sf: Digit[A]) :FingerTree[A] =
+    // in the implementation might happen that pr will be empty
+    def deepL[A] (pr: Digit[A], m: FingerTree[Node[A]], sf: Digit[A]) :FingerTree[A] =
+      if (pr.isEmpty)
+        m match {
+          case NilTree () => Digit.toTree(sf)
+          case ConsL(a, m1) => Deep(Node.toList(a), m1, sf) //Node.toList(a) creates a digit a is a Node
+        }
+      else
+        Deep(pr, m, sf)
 
-    // def deepR[A] ... = ...
+    def deepR[A] (pr: Digit[A], m: FingerTree[Node[A]], sf: Digit[A]) :FingerTree[A] = 
+      if (sf.isEmpty)
+        m match {
+          case NilTree () => Digit.toTree(pr)
+          case ConsR(m1, a) => Deep(pr, m1, Node.toList(a))
+        }
+      else
+        Deep(pr, m, sf)
 
     // page 7
 
-    // def headL[A] ... = ...
-    // def tailL[A] ... = ...
-    // def headR[A] ... = ...
-    // def tailR[A] ... = ...
+    def headL[A] (t: FingerTree[A]): Option[A] = t match {
+      case Empty () => None
+      case ConsL(head, tail) => Some(head)
+    }
+
+    def tailL[A] (t: FingerTree[A]): FingerTree[A] = t match {
+      case Empty () => Empty ()
+      case ConsL(head, tail) => tail
+    }
+
+    def headR[A] (t: FingerTree[A]): Option[A] = t match {
+      case Empty () => None
+      case ConsR(tail, head) => Some(head)
+    }
+
+    def tailR[A] (t: FingerTree[A]): FingerTree[A] = t match {
+      case Empty () => Empty()
+      case ConsR(tail, head) => tail
+    }
   }
 
 }
-
-
