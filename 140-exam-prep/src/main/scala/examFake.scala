@@ -164,6 +164,11 @@ object Q5 {
    * Task 5.
    *
    * Consider a type of lazy binary trees:
+   *
+   * l: () => Tree[A] passing a function
+   * l: => Tree[A] passing a lazy value
+   * 1st construct funtions
+   * 2en get the values (cached in the lazy variable)
    */
 
   trait Tree[+A]
@@ -175,7 +180,12 @@ object Q5 {
    * but does not require using explicit delays like Branch.
    */
 
-  def branch[A] (l : =>Tree[A], r: =>Tree[A]) :Tree[A] = ???
+  def branch[A] (l : => Tree[A], r: => Tree[A]) :Tree[A] = {
+    // sort of optimization because of lazyness
+    lazy val left = l
+    lazy val right = r
+    Branch(() => left, () => right)
+  }
 
 }
 
