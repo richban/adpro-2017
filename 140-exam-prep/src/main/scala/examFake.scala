@@ -60,7 +60,8 @@ object Q1 {
     return result
   }
 
-  def listDifferentialFun (inList :List[Int]) :List[Int] = ??? // complete
+  def listDifferentialFun (inList :List[Int]) :List[Int] =
+    foldLeft(inList.head)((b, a) => a - b)
 
 }
 
