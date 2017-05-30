@@ -60,8 +60,15 @@ object Q1 {
     return result
   }
 
-  def listDifferentialFun (inList :List[Int]) :List[Int] =
-    foldLeft(inList.head)((b, a) => a - b)
+  def listDifferentialFun (inList :List[Int]) :List[Int] = intList match {
+    case Nil => Nil
+    case List(_) => List[Int]()
+    case (f::h::t) => (f-h)::listDifferentialFun(h::t)
+  }
+
+  def listDifferentialFun2 (inList :List[Int]) :List[Int] =
+    if (inList.size < 2) Nil
+    else intList.zip(intList.tail).map(a => a._2 - a._1)
 
 }
 
@@ -84,7 +91,8 @@ object Q2 {
    * characters back to a String.
    */
 
-   def onList (f: String => String): List[Char] => List[Char] = ??? // complete
+   def onList (f: String => String): List[Char] => List[Char] =
+     (a: List[Char]) => f(a.mkString).toList
 
 }
 
@@ -144,7 +152,7 @@ object Q4 {
    * just for a type declaration.
    */
 
-   // def conditionalP ... = ??? // replace ..., leave ??? in place this time.
+   def conditionalP (e1: Event, e2: Event): Option[Probability]= ??? // replace ..., leave ??? in place this time.
 
 }
 
