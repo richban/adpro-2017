@@ -300,7 +300,8 @@ object Question7 {
    * Provide an explicit type for multiplesOf10UpTo
    */
 
-  // def multiplesOf10UpTo ...
+  def multiplesOf10UpTo (m: Int): Gen[Int] = arbitraryInt.map {
+        n => ((n/10) % (m) * 10) }
 
 }
 
@@ -330,5 +331,8 @@ object Question8 {
   val v1 = arbitraryInt.flatMap (n => listOfN(n, arbitraryInt))
   val v2 = arbitraryInt.flatMap (n => listOfN(n, arbitraryInt)).
            sample.run (RNG.Simple(42))
+
+  v1 :Gen[List[Int]]
+  v2 :(List[Int], RNG)
 
 }
