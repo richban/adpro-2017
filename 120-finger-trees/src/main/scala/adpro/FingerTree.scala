@@ -178,7 +178,15 @@ object data {
       }
     }
 
-    // def reduceL[A,Z] (opl: (Z,A) => Z) (z: Z, t: FingerTree[A]) :Z = ...
+    def reduceL[A,Z] (opl: (Z,A) => Z) (z: Z, t: FingerTree[A]) :Z = t match {
+        case Empty () => z
+        case Single(a) => opl(z, a)
+        case Deep(pf, m, sf) => {
+          val lpf = Digit.reduceL[A,Z](opl)(z, pf)
+          val rm = FingerTree.reduceL[Node[A],Z]((z, n) => Node.reduceL(opl)(z,n))(lpf, m)
+          Digit.reduceL[A,Z](opl)(rm, sf)
+        }
+    }
 
     // page 5 bottom (the left triangle); Actually we could use the left
     // triangle in Scala but I am somewhat old fashioned ...
