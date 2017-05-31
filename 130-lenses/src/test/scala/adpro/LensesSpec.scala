@@ -69,8 +69,8 @@ class LensesSpec extends FlatSpec with Checkers {
   "l3" should behave like wellBehavedTotalLense (l3)
   //"l3_1" should behave like veryWellBehavedTotalLense (l3)
 
-  //"codiag[Int]" should behave like veryWellBehavedTotalLense (codiag[Int])
-  //"codiag[String]" should behave like veryWellBehavedTotalLense (codiag[String])
+  // "codiag[Int]" should behave like veryWellBehavedTotalLense (codiag[Int])
+  // "codiag[String]" should behave like veryWellBehavedTotalLense (codiag[String])
   // "codiag1[Int]" should behave like veryWellBehavedTotalLense (codiag1[Int])
   // "codiag1[String]" should behave like veryWellBehavedTotalLense (codiag1[String])
 
@@ -78,8 +78,8 @@ class LensesSpec extends FlatSpec with Checkers {
 
   // Tests for Exercise 4 (uncomment)
 
-  // "itu" should "show Alex at zipcode 2800" in
-  // { assertResult(itu.students("Alex").zipcode) ("2800") }
+  "itu" should "show Alex at zipcode 2800" in
+  { assertResult(itu.students("Alex").zipcode) ("2800") }
 
   // "itu1" should "show Alex at zipcode 9100" in
   // { assertResult(itu1.students("Alex").zipcode) ("9100") }
