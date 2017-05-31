@@ -95,7 +95,17 @@ object Lenses {
   // use the infix constructor in this exercise, instead of Either.  All the
   // imports in the project are already set up.
 
-  // def codiag[A]: Lens[A \/ A, A] = ... TODO (ca 10-15 lines)
+  def getEither[A] (s: A \/ A): A = s match {
+    case -\/ (a) => a
+    case \/- (a) => a
+  }
+
+  def setEither[A](f: A)(s: A \/ A): A \/ A = s match {
+    case -\/ (_) => -\/ (f)
+    case \/- (_) => \/- (f)
+  }
+
+  def codiag[A]: Lens[A \/ A, A]  = Lens[A \/ A, A](getEither)(setEither)
   //
   // Some codiag tests are found in LensesSpec.  Test your solution.
 
@@ -112,7 +122,7 @@ object Lenses {
   //
   // Translate morris' implementation of codiag to Monocle and test it.
 
-  // def codiag1[A]: Lens[A \/ A, A] = TODO ... (ca. 1 line)
+  def codiag1[A]: Lens[A \/ A, A] = lensChoice.choice(Lens.id, Lens.id)
   //
   // Test this implementation uncommenting tests in LensesSpec.scala
 
@@ -148,7 +158,7 @@ object Lenses {
   // the copy.  For instance itu.copy (students = itu.students.tail) creates a
   // copy of ITU without the first student.
 
-  // val itu1 = ... TODO
+  val itu1 = itu.copy(students = itu.students + (("Alex", itu.students("Alex").copy(zipcode = "9100"))))
 
   // There is a test in LensesSpec to check whether  you did what expected.
   //
