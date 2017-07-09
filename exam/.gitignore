@@ -10,7 +10,7 @@ src_managed/
 project/boot/
 project/plugins/project/
 src/noweb/*.pdf
-
+.idea/
 # vim
 tags
 .*.swp
