@@ -58,13 +58,15 @@ case class Gen[A] (sample :State[RNG,A]) {
   // the output state of one as an input to the next.  This can be used to
   // execute a series of consecutive generations, passing the RNG state around.
 
-  // def listOfN (n :Int) :Gen[List[A]] = ...
+  def listOfN (n :Int) :Gen[List[A]] = 
+    Gen(State.sequence(List.fill (n) (this.sample)))
 
 
 
   // Exercise 4 (Ex. 8.6 [Chiusano, Bjarnasson 2015])
 
-  // def flatMap[B] (f: A => Gen[B]) :Gen[B] = ...
+  def flatMap[B] (f: A => Gen[B]) :Gen[B] =
+    Gen(sample.flatMap (a => f(a).sample))
 
 
   // It would be convenient to also have map (uncomment once you have unit and flatMap)
@@ -73,7 +75,8 @@ case class Gen[A] (sample :State[RNG,A]) {
 
   // Exercise 5 (Second part of Ex. 8.6)
 
-  // def listOfN(size: Gen[Int]): Gen[List[A]] = ...
+  def listOfN(size: Gen[Int]): Gen[List[A]] =
+    size.flatMap (listOfN)
 
   // Exercise 6 (Ex. 8.7; I implemented it as a method, the book asks for a
   // function, the difference is minor; you may want to have both for
@@ -82,7 +85,8 @@ case class Gen[A] (sample :State[RNG,A]) {
   // Hint: we already have a generator that emulates tossing a coin. Which one
   // is it? Use flatMap with it.
 
-  // def union (that :Gen[A]) :Gen[A] = ...
+  def union (that :Gen[A]) :Gen[A] = 
+    Gen.boolean.flatMap(b => if(b) that else this)
 
   // Exercise 7 continues in the bottom of the file (in the companion object)
 }
@@ -101,35 +105,35 @@ object Gen {
   def anyInteger :Gen[Int] = Gen(State(_.nextInt))
 
   // Exercise 1 (Ex. 8.4)
-  //
+  //  
   // Hint: Before solving the exercise study the type \lstinline{Gen} in
   // \texttt{Gen.scala}. Then, think how to convert a random integer to a
   // random integer in a range.  Then recall that we are already using
   // generators that are wrapped in \texttt{State} and the state has a
   // \lstinline{map} function.
 
-  // def choose (start :Int, stopExclusive :Int) :Gen[Int] = ...
-
-
+  def choose (start :Int, stopExclusive :Int) :Gen[Int] =
+    Gen(State(RNG.nonNegativeInt).map(n => + start % (stopExclusive - start)))
 
   // Exercise 2 (Exercise 8.5, part one)
   //
   // Hint: The \lstinline{State} trait already had \lstinline{unit}
   // implemented.
 
-  // def unit[A] (a : =>A) :Gen[A] = ...
+  def unit[A] (a : =>A) :Gen[A] =
+    Gen(State.unit(a))
 
   // Hint: How do you convert a random integer number to a random Boolean?
   // Alternatively: do we already have a random generator for booleans? Could
   // we wrap it in.
 
-  // def boolean :Gen[Boolean] = ...
+  def boolean :Gen[Boolean] = Gen(State(RNG.boolean))
 
 
   // Hint: Recall from Exercise1.scala that we already implemented a random
   // number generator for doubles.
 
-  // def double :Gen[Double] = ...
+  def double :Gen[Double] = Gen(State(RNG.double))
 
 
 
@@ -177,7 +181,16 @@ case class Prop (run :(TestCases,RNG) => Result) {
 
   // (Exercise 7)
 
-  // def && (that :Prop) :Prop = Prop { ... }
+  def && (that :Prop) :Prop = Prop {
+    (a, rng) => {
+      r1 = that.run(a,rng)
+      r2 = this.run(a, rng)
+      (r1, r2) match {
+        case (Passed, Passed) => Passed
+        case (Proved, Proved) => Proved 
+      } 
+    }
+  }
 
   // def || (that :Prop) :Prop = Prop { ... }
 

@@ -25,7 +25,8 @@ class FingerTreeSpecWasowski extends FlatSpec with Checkers {
   // Generator of arbitrary trees of given size for scala check (you can use it
   // in your properties)
 
-  // def fingerTreeOfN[A] (n: Int, gen: Gen[A]) :Gen[FingerTree[A]] = ...
+  def fingerTreeOfN[A] (n: Int, gen: Gen[A]) :Gen[FingerTree[A]] =
+    Gen.listOfN(n,gen).map(g => FingerTree.toTree(g))
   // generate it using Gen.listOfN of Integers between 0 and 1000, and then map
   // it to finger trees using toTree.
 
@@ -74,15 +75,15 @@ class FingerTreeSpecWasowski extends FlatSpec with Checkers {
   behavior of "addL"
 
   it should "produce a queue containing the inserted element" in {
-    // assert(Empty().addL(42).toList == List(42))
+    assert(Empty().addL(42).toList == List(42))
   }
 
-  // it should "produce a queue containing the inserted elements" in check {
-    // forAll (Gen.listOfN(100, Gen.choose[Int](0,1000))) {
-    //   (l :List[Int]) =>
-    //     l.foldRight[FingerTree[Int]] (Empty()) (FingerTree.addL).toList == l
-    // }
-  // }
+  it should "produce a queue containing the inserted elements" in check {
+    forAll (Gen.listOfN(100, Gen.choose[Int](0,1000))) {
+       (l :List[Int]) =>
+         l.foldRight[FingerTree[Int]] (Empty()) (FingerTree.addL).toList == l
+     }
+   }
 
   behavior of "addR"
 
@@ -90,47 +91,47 @@ class FingerTreeSpecWasowski extends FlatSpec with Checkers {
 
   behavior of "toTree"
 
-  // it should "be an identitity on trees" in check {
-    // forAll (fingerTreeOfN(100, Gen.choose[Int](0,1000))) {
-    //   (t :FingerTree[Int]) => toTree (t) == t
-    // }
-  // }
+  it should "be an identitity on trees" in check {
+    forAll (fingerTreeOfN(100, Gen.choose[Int](0,1000))) {
+      (t :FingerTree[Int]) => toTree (t) == t
+    }
+  }
 
   behavior of "left views (extractors)"
 
   // the tests can be easily rewritten to paper-style views
 
   it should "be NilTree on Empty" in {
-    // Empty() match {
-    //   case NilTree () => assert(Empty().empty)
-    //   case _ => fail()
-    // }
+    Empty() match {
+       case NilTree () => assert(Empty().empty)
+       case _ => fail()
+    }
   }
 
   it should "be ConsL(_,Nil) on Single" in {
-    // Single(42) match {
-    //   case ConsL(_,NilTree()) => assert(Single(42).nonEmpty)
-    //   case _ => fail()
-    // }
+    Single(42) match {
+       case ConsL(_,NilTree()) => assert(Single(42).nonEmpty)
+       case _ => fail()
+    }
   }
 
-  // it should "be ConsL(_,Consl(_,_)) on any tree larger than 3" in check {
-    // val ft3plus = Gen.choose(3,100) flatMap { fingerTreeOfN(_,arbitrary[Int]) }
-    // forAll (ft3plus) { (t: FingerTree[Int]) => t match {
-    //   case ConsL (a, ConsL(b,_)) => true
-    //   case _ => false
-    //   }
-    // }
-  // }
+  it should "be ConsL(_,Consl(_,_)) on any tree larger than 3" in check {
+    val ft3plus = Gen.choose(3,100) flatMap { fingerTreeOfN(_,arbitrary[Int]) }
+    forAll (ft3plus) { (t: FingerTree[Int]) => t match {
+       case ConsL (a, ConsL(b,_)) => true
+       case _ => false
+      }
+    }
+  }
 
-  // it should "have the right prefix on any tree larger than 3" in check {
-    // val list3plus = Gen.choose(3,100) flatMap { Gen.listOfN(_,arbitrary[Int]) }
-    // forAll (list3plus) { (l: List[Int]) =>
-    //   val t = Digit.toTree (l)
-    //   t.headL == l.head && t.tailL.headL == l.tail.head &&
-    //   t.tailL.tailL.headL == l.tail.tail.head
-    // }
-  // }
+  it should "have the right prefix on any tree larger than 3" in check {
+    val list3plus = Gen.choose(3,100) flatMap { Gen.listOfN(_,arbitrary[Int]) }
+    forAll (list3plus) { (l: List[Int]) =>
+       val t = Digit.toTree (l)
+       t.headL == l.head && t.tailL.headL == l.tail.head &&
+       t.tailL.tailL.headL == l.tail.tail.head
+    }
+  }
 
   behavior of "right views"
 
